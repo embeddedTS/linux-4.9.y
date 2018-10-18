@@ -292,6 +292,21 @@ config PWM_MXS
 	  To compile this driver as a module, choose M here: the module
 	  will be called pwm-mxs.
 
+config TS7680_PWM_WORKAROUND
+	bool "PWM fixups for TS-7680"
+	depends on PWM_MXS
+	help
+	  The TS-7680's FPGA is driven from a PWM signal. This is set up in
+	  U-Boot, however, there is no sane way to make the kernel not touch
+	  the PWM block or channel.
+
+	  This provides a series of workarounds that affect the mxs-pwm driver
+	  as well as clk-pwm to allow the kernel to set up the proper frequency
+	  on the PWM channel without taking any steps that would cause a glitch
+	  on the PWM output.
+
+	  This _NEEDS_ to be selected when compiling for a TS-7680.
+
 config PWM_OMAP_DMTIMER
 	tristate "OMAP Dual-Mode Timer PWM support"
 	depends on OF && ARCH_OMAP && OMAP_DM_TIMER

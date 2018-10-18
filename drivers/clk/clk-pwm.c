@@ -90,9 +90,28 @@ static int clk_pwm_probe(struct platform_device *pdev)
 	/*
 	 * FIXME: pwm_apply_args() should be removed when switching to the
 	 * atomic PWM API.
+	 *
+	 * XXX:
+	 * Do not call this function on the TS-7680, it causes a second call
+	 * to pwm_config() which incorrectly sets duty and causes a glitch
+	 * in the generated PWM clock.
 	 */
+#if !defined(CONFIG_TS7680_PWM_WORKAROUND)
 	pwm_apply_args(pwm);
+#endif
+
+	/* XXX:
+	 * The original calculation causes issues at the top end of frequency
+	 * range. The TS-7680 needs to be able to generate a 12 MHz signal set
+	 * fromt he DTS.
+	 */
+#if defined(CONFIG_TS7680_PWM_WORKAROUND)
+	ret = pwm_config(pwm,
+	  (pargs.period == 83 ? pargs.period : (pargs.period + 1) >> 1),
+	  pargs.period);
+#else
 	ret = pwm_config(pwm, (pargs.period + 1) >> 1, pargs.period);
+#endif
 	if (ret < 0)
 		return ret;
 

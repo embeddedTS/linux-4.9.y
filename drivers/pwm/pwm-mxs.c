@@ -92,8 +92,17 @@ static int mxs_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	/*
 	 * If the PWM is not enabled, turn the clock off again to save power.
 	 */
+	/* XXX:
+	 * Do not ever let the clock get turned off on a TS-7680
+	 * The new atomic PWM API means that all PWMs start out as disabled
+	 * This is one of the contributing factors to the clock glitch that
+	 * occurs at startup. U-Boot sets everthing up properly in the case of
+	 * the TS-7680.
+	 */
+#if !defined(CONFIG_TS7680_PWM_WORKAROUND)
 	if (!pwm_is_enabled(pwm))
 		clk_disable_unprepare(mxs->clk);
+#endif
 
 	return 0;
 }
@@ -166,9 +175,17 @@ static int mxs_pwm_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, mxs);
 
+	/* XXX:
+	 * Prevent the PWM block from being reset on the TS-7680.
+	 * It was already reset and enabled in U-Boot to start the PWM clock
+	 * for the FPGA. If there is a reset then it causes a glitch in the
+	 *clock which can upset the FPGA
+	 */
+#if !defined(CONFIG_TS7680_PWM_WORKAROUND)
 	ret = stmp_reset_block(mxs->base);
 	if (ret)
 		goto pwm_remove;
+#endif
 
 	return 0;
 
