@@ -614,6 +614,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
 				"Failed to enable vmmc regulator: %d\n", ret);
 			goto out_mmc_free;
 		}
+	} else {
+		if(PTR_ERR(reg_vmmc) == -EPROBE_DEFER) {
+			ret = -EPROBE_DEFER;
+			goto out_mmc_free;
+		}
 	}
 
 	ssp->clk = devm_clk_get(&pdev->dev, NULL);
