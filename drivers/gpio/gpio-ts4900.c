@@ -145,6 +145,7 @@ static int ts4900_gpio_probe(struct i2c_client *client,
 	const struct of_device_id *match;
 	struct ts4900_gpio_priv *priv;
 	u32 ngpio;
+	u32 base;
 	int ret;
 
 	match = of_match_device(ts4900_gpio_of_match_table, &client->dev);
@@ -154,6 +155,9 @@ static int ts4900_gpio_probe(struct i2c_client *client,
 	if (of_property_read_u32(client->dev.of_node, "ngpios", &ngpio))
 		ngpio = DEFAULT_PIN_NUMBER;
 
+	if (of_property_read_u32(client->dev.of_node, "base", &base))
+		base = -1;
+
 	priv = devm_kzalloc(&client->dev, sizeof(*priv), GFP_KERNEL);
 	if (!priv)
 		return -ENOMEM;
@@ -161,6 +165,7 @@ static int ts4900_gpio_probe(struct i2c_client *client,
 	priv->gpio_chip = template_chip;
 	priv->gpio_chip.label = "ts4900-gpio";
 	priv->gpio_chip.ngpio = ngpio;
+	priv->gpio_chip.base = base;
 	priv->gpio_chip.parent = &client->dev;
 	priv->input_bit = (uintptr_t)match->data;
 
