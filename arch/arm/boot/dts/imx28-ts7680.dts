@@ -30,6 +30,38 @@
 		reg = <0x40000000 0x08000000>;   /* 128MB */
 	};
 
+	leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_gpio_leds>;
+		compatible = "gpio-leds";
+
+
+		green-led {
+			label = "green-led";
+			gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+		red-led {
+			label = "red-led";
+			gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		yellow-led {
+			label = "yellow-led";
+			gpios = <&gpio1 26 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		blue-led {
+			label = "blue-led";
+			gpios = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+	};
+
 	apb@80000000 {
 		apbh@80000000 {
 
@@ -230,6 +262,19 @@
 					fsl,drive-strength = <MXS_DRIVE_4mA>;
 					fsl,voltage = <MXS_VOLTAGE_HIGH>;
 					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				pinctrl_gpio_leds: gpio-led@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_GPMI_D05__GPIO_0_5
+					  MX28_PAD_GPMI_D07__GPIO_0_7
+					  MX28_PAD_LCD_RS__GPIO_1_26
+					  MX28_PAD_LCD_RD_E__GPIO_1_24
+					>;
+					fsl,drive-strength = <MXS_DRIVE_12mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_DISABLE>;
 				};
 			};
 
