@@ -419,8 +419,6 @@
 			phy-mode = "rmii";
 			pinctrl-names = "default";
 			pinctrl-0 = <&mac0_pins_ts7680>;
-			clocks = <&clks 57>, <&clks 57>, <&clks 64>;
-			clock-names = "ipg", "ahb", "enet_out";
 			phy-supply = <&phy_dummy_vbus>;
 			/* Do not give reset control to the kernel, U-Boot
 			 * may have set up the switch and we don't want to
