@@ -422,13 +422,17 @@
 			clocks = <&clks 57>, <&clks 57>, <&clks 64>;
 			clock-names = "ipg", "ahb", "enet_out";
 			phy-supply = <&phy_dummy_vbus>;
+			/* Do not give reset control to the kernel, U-Boot
+			 * may have set up the switch and we don't want to
+			 * change that here
+			 */
 			/*phy-reset-gpios = <&gpio8 43 GPIO_ACTIVE_LOW>;*/
 			phy-reset-duration = <1000>;
 			status = "okay";
 
-			phy: ethernet@0 {
-				device_type = "network";
-				fixed-link = <0 1 100 0 0>;
+			fixed-link {
+				speed = <100>;
+				full-duplex;
 			};
 		};
 	};
