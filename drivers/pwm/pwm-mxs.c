@@ -99,10 +99,10 @@ static int mxs_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	 * occurs at startup. U-Boot sets everthing up properly in the case of
 	 * the TS-7680.
 	 */
-#if !defined(CONFIG_TS7680_PWM_WORKAROUND)
-	if (!pwm_is_enabled(pwm))
-		clk_disable_unprepare(mxs->clk);
-#endif
+	if (!of_machine_is_compatible("fsl,imx28-ts7680")) {
+		if (!pwm_is_enabled(pwm))
+			clk_disable_unprepare(mxs->clk);
+	}
 
 	return 0;
 }
@@ -181,11 +181,11 @@ static int mxs_pwm_probe(struct platform_device *pdev)
 	 * for the FPGA. If there is a reset then it causes a glitch in the
 	 *clock which can upset the FPGA
 	 */
-#if !defined(CONFIG_TS7680_PWM_WORKAROUND)
-	ret = stmp_reset_block(mxs->base);
-	if (ret)
-		goto pwm_remove;
-#endif
+	if (!of_machine_is_compatible("fsl,imx28-ts7680")) {
+		ret = stmp_reset_block(mxs->base);
+		if (ret)
+			goto pwm_remove;
+	}
 
 	return 0;
 

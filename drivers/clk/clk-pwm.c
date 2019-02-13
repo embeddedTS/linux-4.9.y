@@ -96,22 +96,23 @@ static int clk_pwm_probe(struct platform_device *pdev)
 	 * to pwm_config() which incorrectly sets duty and causes a glitch
 	 * in the generated PWM clock.
 	 */
-#if !defined(CONFIG_TS7680_PWM_WORKAROUND)
-	pwm_apply_args(pwm);
-#endif
+	if (!of_machine_is_compatible("fsl,imx28-ts7680")) {
+		pwm_apply_args(pwm);
+	}
 
 	/* XXX:
 	 * The original calculation causes issues at the top end of frequency
 	 * range. The TS-7680 needs to be able to generate a 12 MHz signal set
-	 * fromt he DTS.
+	 * from the DTS.
 	 */
-#if defined(CONFIG_TS7680_PWM_WORKAROUND)
-	ret = pwm_config(pwm,
-	  (pargs.period == 83 ? pargs.period : (pargs.period + 1) >> 1),
-	  pargs.period);
-#else
-	ret = pwm_config(pwm, (pargs.period + 1) >> 1, pargs.period);
-#endif
+	if (of_machine_is_compatible("fsl,imx28-ts7680")) {
+		ret = pwm_config(pwm,
+		  (pargs.period == 83 ? pargs.period : (pargs.period + 1) >> 1),
+		  pargs.period);
+	} else {
+		ret = pwm_config(pwm, (pargs.period + 1) >> 1, pargs.period);
+	}
+
 	if (ret < 0)
 		return ret;
 
