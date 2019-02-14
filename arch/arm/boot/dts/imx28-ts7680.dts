@@ -81,8 +81,7 @@
 				compatible = "fsl,imx28-mmc";
 				pinctrl-names = "default";
 				pinctrl-0 = <&mmc1_4bit_pins
-					     &mmc1_sck_cfg /* in DTSI */
-					     &en_sd_pwr>;
+					     &mmc1_sck_cfg>; /* in DTSI */
 				broken-cd = <1>;
 				bus-width = <4>;
 				vmmc-supply = <&reg_vddio_sd0>;
