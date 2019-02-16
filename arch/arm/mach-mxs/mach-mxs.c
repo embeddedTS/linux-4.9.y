@@ -283,6 +283,14 @@ static void __init m28cu3_init(void)
 	update_fec_mac_prop(OUI_DENX);
 }
 
+static void __init imx28_ts7680_init(void)
+{
+	/* This workaround is required so that the switch IC always has a
+	 * valid clock
+	 */
+	enable_clk_enet_out();
+}
+
 static const char __init *mxs_get_soc_id(void)
 {
 	struct device_node *np;
@@ -423,6 +431,8 @@ static void __init mxs_machine_init(void)
 		duckbill_init();
 	else if (of_machine_is_compatible("msr,m28cu3"))
 		m28cu3_init();
+	else if (of_machine_is_compatible("fsl,imx28-ts7680"))
+		imx28_ts7680_init();
 
 	of_platform_default_populate(NULL, NULL, parent);
 
