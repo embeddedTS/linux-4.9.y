@@ -71,8 +71,9 @@ static int ts_wdt_write(u16 deciseconds)
 	if (ret != 1) {
 		dev_err(&client->dev, "%s: write error, ret=%d\n",
 			__func__, ret);
+		return ret;
 	}
-	return !ret;
+	return 0;
 }
 
 /* Watchdog is on by default.  We feed every timeout/2 until userspace feeds */
@@ -87,7 +88,6 @@ static void ts_wdt_ping_enable(struct ts_wdt_dev *wdev)
 static void ts_wdt_ping_disable(struct ts_wdt_dev *wdev)
 {
 	dev_dbg(&client->dev, "%s\n", __func__);
-	ts_wdt_write(TS_DEFAULT_TIMEOUT * 10);
 	cancel_delayed_work_sync(&wdev->ping_work);
 }
 
@@ -96,9 +96,18 @@ static int ts_wdt_start(struct watchdog_device *wdt)
 	struct ts_wdt_dev *wdev = watchdog_get_drvdata(wdt);
 
 	dev_dbg(&client->dev, "%s\n", __func__);
-	dev_dbg(&client->dev, "Feeding for %d seconds\n", wdt->timeout);
+	dev_dbg(&client->dev, "Stopping autofeed and feeding for %d seconds\n",
+	  wdt->timeout);
 
 	ts_wdt_ping_disable(wdev);
+	return ts_wdt_write(wdt->timeout * 10);
+}
+
+static int ts_wdt_ping(struct watchdog_device *wdt)
+{
+	dev_dbg(&client->dev, "%s\n", __func__);
+	dev_dbg(&client->dev, "Feeding for %d seconds\n", wdt->timeout);
+
 	return ts_wdt_write(wdt->timeout * 10);
 }
 
@@ -178,6 +187,7 @@ static struct watchdog_ops ts_wdt_ops = {
 	.owner		= THIS_MODULE,
 	.start		= ts_wdt_start,
 	.stop		= ts_wdt_stop,
+	.ping		= ts_wdt_ping,
 	.set_timeout	= ts_set_timeout,
 };
 
