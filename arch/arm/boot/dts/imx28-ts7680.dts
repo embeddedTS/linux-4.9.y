@@ -493,8 +493,10 @@
 	};
 
 	fpga_clock {
-		/* Note that for this to work, CONFIG_TS7680_PWM_WORKAROUND must
-		 * be enabled. Otherwise this PWM channel will have no output.
+		/* Note that for this to work, modifications to clk-pwm and
+		 * pwm-mxs must be in place to prevent the clock from resetting
+		 * at any point, as well as to fix a math error when running the
+		 * PWM at 12 MHz, which is its uppper limit.
 		 */
 		compatible = "pwm-clock";
 		#clock-cells = <0>;
