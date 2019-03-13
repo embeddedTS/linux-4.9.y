@@ -2445,6 +2445,22 @@ config FB_SIMPLE
 	  Configuration re: surface address, size, and format must be provided
 	  through device tree, or plain old platform data.
 
+config FB_ST7565P
+   tristate "ST7565P Virtual Frame Buffer support"
+	depends on FB
+	select FB_SYS_FILLRECT
+	select FB_SYS_COPYAREA
+	select FB_SYS_IMAGEBLIT
+	select FB_SYS_FOPS
+	---help---
+	  This is a `virtual' frame buffer device specifically for the
+	  ST7565P LCD display device when attached to a
+	  Technologic Systems TS-7553-V2
+	  board.
+
+	  This driver also requires a userspace program ("lcd-helper") to communicate
+	  with the ST7565P via SPI.
+
 source "drivers/video/fbdev/omap/Kconfig"
 source "drivers/video/fbdev/omap2/Kconfig"
 source "drivers/video/fbdev/mmp/Kconfig"
