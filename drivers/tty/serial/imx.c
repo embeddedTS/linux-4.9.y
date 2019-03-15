@@ -205,6 +205,7 @@ struct imx_port {
 	struct timer_list	timer;
 	unsigned int		old_status;
 	unsigned int		have_rtscts:1;
+	unsigned int		rs485_enable_boot:1;
 	unsigned int		dte_mode:1;
 	unsigned int		irda_inv_rx:1;
 	unsigned int		irda_inv_tx:1;
@@ -896,6 +897,7 @@ static void imx_set_mctrl(struct uart_port *port, unsigned int mctrl)
 	struct imx_port *sport = (struct imx_port *)port;
 	unsigned long temp;
 
+	/* Handles CTS if RS-485 mode not enabled */
 	if (!(port->rs485.flags & SER_RS485_ENABLED)) {
 		temp = readl(sport->port.membase + UCR2);
 		temp &= ~(UCR2_CTS | UCR2_CTSC);
@@ -904,17 +906,31 @@ static void imx_set_mctrl(struct uart_port *port, unsigned int mctrl)
 		writel(temp, sport->port.membase + UCR2);
 	}
 
+	/* UCR3_DSR is unused in i.MX6UL */
 	temp = readl(sport->port.membase + UCR3) & ~UCR3_DSR;
 	if (!(mctrl & TIOCM_DTR))
 		temp |= UCR3_DSR;
 	writel(temp, sport->port.membase + UCR3);
 
+	/* Handles setting internal loopback */
 	temp = readl(sport->port.membase + uts_reg(sport)) & ~UTS_LOOP;
 	if (mctrl & TIOCM_LOOP)
 		temp |= UTS_LOOP;
 	writel(temp, sport->port.membase + uts_reg(sport));
 
-	mctrl_gpio_set(sport->gpios, mctrl);
+	/* Only modify ctrl signals if not set to RS-485 mode
+	 *
+	 * Leaving this as is here to limit the amount of driver modifications.
+	 * This is opposed to moving it up to the block above or even putting
+	 * this whole function inside of a if (!SER_RS485_ENABLED) block.
+	 *
+	 * If in RS-485 mode and the below mctrl... function is allowed to be
+	 * called, then there is the side effect of RTS, used as TXEN, being
+	 * asserted long before and long after serial transmission is occurring.
+	 */
+	if (!(port->rs485.flags & SER_RS485_ENABLED)) {
+		mctrl_gpio_set(sport->gpios, mctrl);
+	}
 }
 
 /*
@@ -2034,6 +2050,12 @@ static int serial_imx_probe_dt(struct imx_port *sport,
 	    of_get_property(np, "fsl,uart-has-rtscts", NULL) /* deprecated */)
 		sport->have_rtscts = 1;
 
+	if (of_property_read_bool(np, "linux,rs485-enabled-at-boot-time")) {
+		sport->rs485_enable_boot = 1;
+	} else {
+		sport->rs485_enable_boot = 0;
+	}
+
 	if (of_get_property(np, "fsl,dte-mode", NULL))
 		sport->dte_mode = 1;
 
@@ -2105,7 +2127,9 @@ static int serial_imx_probe(struct platform_device *pdev)
 	sport->port.ops = &imx_pops;
 	sport->port.rs485_config = imx_rs485_config;
 	sport->port.rs485.flags =
-		SER_RS485_RTS_ON_SEND | SER_RS485_RX_DURING_TX;
+		SER_RS485_RTS_AFTER_SEND | SER_RS485_RX_DURING_TX;
+	if(sport->rs485_enable_boot)
+		sport->port.rs485.flags |= SER_RS485_ENABLED;
 	sport->port.flags = UPF_BOOT_AUTOCONF;
 	init_timer(&sport->timer);
 	sport->timer.function = imx_timeout;
