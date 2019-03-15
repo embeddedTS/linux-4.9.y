@@ -328,8 +328,8 @@
 	pinctrl-0 = <&pinctrl_uart2>;
 	status = "okay";
 
-	fsl,uart-has-rtscts;
-	fsl,uart-tx-enable-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
+	uart-has-rtscts;
+	rts-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
 	linux,rs485-enabled-at-boot-time;
 };
 
