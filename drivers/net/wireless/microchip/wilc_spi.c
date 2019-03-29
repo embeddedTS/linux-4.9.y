@@ -1059,6 +1059,20 @@ static int wilc_spi_init(struct wilc *wilc, bool resume)
 	 * way to reset
 	 */
 	/* the SPI to it's initial value. */
+
+	/* XXX: Due to current design of the IMX SPI driver, a dummy transaction
+	 * is needed in order to change SPI modes (or other features of the CPU
+	 * SPI peripheral). The WILC module is a little too smart for its own
+	 * good. It is able to accommodate any of the 4 modes but seems to latch
+	 * in the mode on the first SPI transaction. This means that when we do
+	 * a dummy SPI transaction to change the mode, the module sets the first
+	 * mode as the expected mode.
+	 *
+	 * To combat this, we just issue a reset command to the module, then
+	 * do a power cycle of the module to reset the SPI mode it expects.
+	 */
+	wilc_spi_reset(wilc);
+	wilc_wlan_power_on_sequence(wilc);
 	if (!spi_internal_read(wilc, WILC_SPI_PROTOCOL_OFFSET, &reg)) {
 		/*
 		 * Read failed. Try with CRC off. This might happen when module
