@@ -902,7 +902,6 @@ void chip_wakeup_wilc3000(struct wilc *wilc, int source)
 		 * edge on the next loop
 		 */
 		if ((clk_status_reg_val & clk_status_bit) == 0) {
-			dev_warn(wilc->dev, "clocks still OFF. Retrying\n");
 			hif_func->hif_write_reg(wilc, wakeup_reg,
 						wakeup_reg_val & (~wakeup_bit));
 		}
