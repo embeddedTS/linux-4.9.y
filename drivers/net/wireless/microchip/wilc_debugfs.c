@@ -12,9 +12,7 @@
 
 static struct dentry *wilc_dir;
 
-atomic_t WILC_DEBUG_REGION = ATOMIC_INIT(INIT_DBG | GENERIC_DBG |
-					 CFG80211_DBG | HOSTAPD_DBG |
-					 PWRDEV_DBG);
+atomic_t WILC_DEBUG_REGION = ATOMIC_INIT(0);
 
 static ssize_t wilc_debug_region_read(struct file *file, char __user *userbuf,
 				     size_t count, loff_t *ppos)
