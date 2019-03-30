@@ -2,7 +2,7 @@ config WILC
 	tristate
 
 config WLAN_VENDOR_MCHP
-        bool "Microhip devices"
+        bool "Microchip devices"
         default y
 	help
 	This adds support for WILC1000 & WILC3000 chips which support
