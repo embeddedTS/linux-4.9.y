@@ -260,17 +260,13 @@
 	pinctrl-0 = <&pinctrl_ecspi4>;
 	status = "okay";
 
-	/*
-	 * NOTE: DT mod to driver does lookup by name. Needs to be named
-	 * "wilc_spi" as it is below!
-	 */
 	wilc_spi@0 {
-		compatible = "atmel,wilc_spi";
+		compatible = "microchip,wilc3000";
 		reg = <0>;
 		spi-max-frequency = <48000000>;
-		wilc3000,reset-gpios = <&gpio4 10 0>;     /* RESET,  GPIO 106 */
-		wilc3000,chip-en-gpios = <&gpio4 26 0>;   /* ENABLE, GPIO 122 */
-		wilc3000,irq-gpios = <&gpio5 01 0>;       /* IRQ,    GPIO 129 */
+		reset-gpios = <&gpio4 10 0>;     /* RESET,  GPIO 106 */
+		chip_en-gpios = <&gpio4 26 0>;   /* ENABLE, GPIO 122 */
+		irq-gpios = <&gpio5 01 0>;       /* IRQ,    GPIO 129 */
 		status = "okay";
 	};
 };
