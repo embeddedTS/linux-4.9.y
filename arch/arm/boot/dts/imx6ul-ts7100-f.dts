@@ -1,0 +1,18 @@
+/*
+ * Copyright 2019 Technologic Systems Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+
+/dts-v1/;
+#include "imx6ul-ts7100.dtsi"
+#include "imx6ul-ts7100-z.dtsi"
+
+/ {
+	model = "Technologic Systems i.MX6UL TS-7100 (TS-7100-Z)";
+	compatible = "technologic,ts7100", "technologic,ts7100z", "fsl,imx6ul";
+};
+
