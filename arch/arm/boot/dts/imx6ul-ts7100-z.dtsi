@@ -1,0 +1,114 @@
+/*
+ * Copyright (C) 2019 Technologic Systems
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/ {
+	leds {
+		compatible = "gpio-leds";
+
+		io-green-led {
+			label = "io-green-led";
+			gpios = <&gpio6 25 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		io-red-led {
+			label = "io-red-led";
+			gpios = <&gpio6 24 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		/* The following are meant to be userspace controlled IO. The
+		 * kernel does not allow setting default state of GPIO, but
+		 * the default state of LEDs can be set, which is why the LED
+		 * subsystem is used.
+		 */
+
+		/* The actual switch is present on the TS-7100-Z baseboard, so
+		 * we specifically implement control for it here. It is
+		 * dependent on the FPGA GPIO (gpio6) which is set up in the
+		 * 7100.dtsi. No iomux needs to be set up for it.
+		 */
+		en-usb-5v {
+			label = "en-usb-5v";
+			gpios = <&gpio6 21 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+	};
+};
+
+&ecspi3 {
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio4 12 GPIO_ACTIVE_HIGH>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi3>;
+	status = "okay";
+
+	wilc_spi@0 {
+		compatible = "microchip,wilc3000";
+		reg = <0>;
+		spi-max-frequency = <48000000>;
+		/* These are in FPGA! */
+		reset-gpios = <&gpio6 23 GPIO_ACTIVE_HIGH>; /* low? */
+		chip_en-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+		irq-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+};
+
+&usbotg1 {
+	dr_mode = "host";
+	disable-over-current;
+	vbus-supply = <&dummy_3v3>;
+	status = "okay";
+};
+
+&usbotg2 {
+	dr_mode = "host";
+	disable-over-current;
+	vbus-supply = <&dummy_3v3>;
+	status = "okay";
+};
+
+&iomuxc {
+	pinctrl-0 = <&ts7100_pinctrl_hog &ts7100z_pinctrl_hog>;
+	imx6ul-7100 {
+		pinctrl_ecspi3: ecspi3grp {
+			fsl,pins = <
+				MX6UL_PAD_NAND_CE0_B__ECSPI3_SCLK	0x1b020
+				MX6UL_PAD_NAND_CE1_B__ECSPI3_MOSI	0x1b020
+				MX6UL_PAD_NAND_CLE__ECSPI3_MISO		0x1b020
+				/* WIFI CS# */
+				MX6UL_PAD_NAND_READY_B__GPIO4_IO12	0x1b020
+				/* WIFI IRQ */
+				MX6UL_PAD_JTAG_TMS__GPIO1_IO11		0x1b020
+				/* EN WIFI PWR */
+				MX6UL_PAD_JTAG_TCK__GPIO1_IO14		0x1b020
+			>;
+		};
+
+		ts7100z_pinctrl_hog: 7100z_hoggrp {
+			fsl,pins = <
+				/* All GPIO should be 0x1b020 unless special
+				 * 0x1b020 == Hyst., 100k PU, 50 mA drive
+				 * 0x1a020 == no pull resistor
+				 * 0x13020 == 100k PD
+				 */
+
+				/* EN_RELAY 1 */
+				MX6UL_PAD_SNVS_TAMPER4__GPIO5_IO04	0x1a020
+				/* EN_RELAY 2 */
+				MX6UL_PAD_SNVS_TAMPER5__GPIO5_IO05	0x1a020
+				/* PUSH_SW_CPU# */
+				MX6UL_PAD_JTAG_TDI__GPIO1_IO13		0x1b020
+				/* CAN1, NC on IO board */
+				MX6UL_PAD_LCD_DATA08__GPIO3_IO13	0x1b020
+				MX6UL_PAD_LCD_DATA09__GPIO3_IO14	0x1b020
+			>;
+		};
+	};
+};
