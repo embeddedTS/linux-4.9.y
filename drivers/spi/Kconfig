@@ -417,6 +417,11 @@ config SPI_OCTEON
 	  SPI host driver for the hardware found on some Cavium OCTEON
 	  SOCs.
 
+config SPI_OCORES
+	tristate "OpenCores SPI Controller"
+	help
+	  This enables using the OpenCores SPI controller.
+
 config SPI_OMAP_UWIRE
 	tristate "OMAP1 MicroWire"
 	depends on ARCH_OMAP1
