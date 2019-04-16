@@ -531,6 +531,15 @@ config GPIO_LOONGSON1
 	help
 	  Say Y or M here to support GPIO on Loongson1 SoCs.
 
+config GPIO_TS71XXWEIM
+	bool "Technologic Systems WEIM FPGA GPIO"
+	depends on IMX_WEIM
+	help
+	  Say yes here to enable the GPIO driver for Technologic's FPGA core
+	  connected to the i.MX6UL WEIM bus.
+
+	  Compatible with TS-7120, TS-7100, and similar
+
 endmenu
 
 menu "Port-mapped I/O GPIO drivers"
