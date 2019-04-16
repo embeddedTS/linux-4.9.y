@@ -19,8 +19,7 @@
 #include <linux/module.h>
 #include <linux/delay.h>
 
-#define TS7120_NR_DIO	 	32
-#define TS7120_DIO_BASE  	160
+#define TSWEIM_NR_DIO	 	32
 
 /* Register offsets from the 'reg' value in device-tree */
 #define BANK_0_OUTPUT_SET_REG 0x10
@@ -36,55 +35,16 @@
 #define BANK_1_OUTPUT_ENABLE_CLR_REG 0x46
 
 
-struct TS7120_gpio_priv {
+struct tsweim_gpio_priv {
 	void __iomem  *syscon;
 	struct gpio_chip gpio_chip;
 	spinlock_t lock;
-	unsigned int direction[4];      /* enough for all 118 DIOs, 1=in, 0=out */
+	unsigned int direction[4];   /* enough for all 118 DIOs, 1=in, 0=out */
 	unsigned int ovalue[4];
 };
 
 
 /*
-	DIO controlled by the FPGA on the TS-7120:
-
-	Bank 0:
-		Header HD20...
-			Pin 2 DIO_2							GPIO BASE + 0
-			Pin 4 DIO_4							GPIO BASE + 1
-			Pin 5 DIO_5							GPIO BASE + 2
-			Pin 6 DIO_6							GPIO BASE + 3
-			Pin 7 DIO_7							GPIO BASE + 4
-			Pin 8 DIO_8							GPIO BASE + 5
-			Pin 9 DIO_9							GPIO BASE + 6
-			Pin 10 DIO_10						GPIO BASE + 7
-			Pin 11 DIO_11						GPIO BASE + 8
-			Pin 12 DIO_12						GPIO BASE + 9
-			Pin 13 DIO_13						GPIO BASE + 10
-			Pin 14 DIO_14						GPIO BASE + 11
-		Silab Programming Clock				GPIO BASE + 12
-		Silab Programming Data				GPIO BASE + 13
-		Enable Blue LED						GPIO BASE + 14
-		Syetem Reset#							GPIO BASE + 15
-
-	Bank 1:
-		Mikro Reset#							GPIO BASE + 16
-		Enable Digital IN 0 & 1				GPIO BASE + 17
-		Enable AN_5V							GPIO BASE + 18
-		Enable PoE								GPIO BASE + 19
-		Enable Nimbel 3.3V					GPIO BASE + 20
-		Enable CAN Transceiver				GPIO BASE + 21
-		Enable Digital IN 2 & 3				GPIO BASE + 22
-		Enable HS SW							GPIO BASE + 23
-		Enable XBEE USB						GPIO BASE + 24
-		Enable LS OUT 0						GPIO BASE + 25
-		Enable WiFi Power						GPIO BASE + 26
-		Enable Nimbel 4V						GPIO BASE + 27
-		Enable GPS 3.3V						GPIO BASE + 28
-		Enable eMMC 3.3V#						GPIO BASE + 29
-		Enable LS OUT 1						GPIO BASE + 30
-		Enable WiFi Reset#					GPIO BASE + 31
-
 	DIO is controlled by eight 16-bit registers in the FPGA Syscon:
 
 	Bank 0:
@@ -101,17 +61,15 @@ struct TS7120_gpio_priv {
 
 */
 
-#define IS_VALID_OFFSET(x) ((x) < TS7120_NR_DIO)
-
-static inline struct TS7120_gpio_priv *to_gpio_TS7120(struct gpio_chip *chip)
+static inline struct tsweim_gpio_priv *to_gpio_tsweim(struct gpio_chip *chip)
 {
-	return container_of(chip, struct TS7120_gpio_priv, gpio_chip);
+	return container_of(chip, struct tsweim_gpio_priv, gpio_chip);
 }
 
-static int TS7120_gpio_get_direction(struct gpio_chip *chip,
+static int tsweim_gpio_get_direction(struct gpio_chip *chip,
 					  unsigned int offset)
 {
-	struct TS7120_gpio_priv *priv = to_gpio_TS7120(chip);
+	struct tsweim_gpio_priv *priv = to_gpio_tsweim(chip);
 
 	if (priv == NULL) {
 		printk("%s %d, priv is NULL!\n", __func__, __LINE__);
@@ -123,17 +81,18 @@ static int TS7120_gpio_get_direction(struct gpio_chip *chip,
 		  return -1;
 	}
 
-	if (!IS_VALID_OFFSET(offset))
+	if (!(offset < priv->gpio_chip.ngpio)) {
 		return -EINVAL;
+	}
 
 	return !!(priv->direction[offset / 32] & (1 << offset % 32));
 
 }
 
-static int TS7120_gpio_direction_input(struct gpio_chip *chip,
+static int tsweim_gpio_direction_input(struct gpio_chip *chip,
 						 unsigned int offset)
 {
-	struct TS7120_gpio_priv *priv = to_gpio_TS7120(chip);
+	struct tsweim_gpio_priv *priv = to_gpio_tsweim(chip);
 	unsigned long flags;
 
 	if (priv == NULL) {
@@ -146,33 +105,37 @@ static int TS7120_gpio_direction_input(struct gpio_chip *chip,
 		  return -1;
 	}
 
-	if (!IS_VALID_OFFSET(offset))
+	if (!(offset < priv->gpio_chip.ngpio)) {
 		return -EINVAL;
+	}
 
 	spin_lock_irqsave(&priv->lock, flags);
 
 	priv->direction[offset / 32] |= (1 << offset % 32);
 
-	if (offset < 16)
-		writew((1 << offset), priv->syscon + BANK_0_OUTPUT_ENABLE_CLR_REG);
-	else
-		writew((1 << (offset-16)), priv->syscon + BANK_1_OUTPUT_ENABLE_CLR_REG);
+	if (offset < 16) {
+		writew((1 << offset),
+		  priv->syscon + BANK_0_OUTPUT_ENABLE_CLR_REG);
+	} else {
+		writew((1 << (offset-16)),
+		  priv->syscon + BANK_1_OUTPUT_ENABLE_CLR_REG);
+	}
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return 0;
 }
 
-static int TS7120_gpio_direction_output(struct gpio_chip *chip,
+static int tsweim_gpio_direction_output(struct gpio_chip *chip,
 					unsigned int offset, int value)
 {
-	struct TS7120_gpio_priv *priv = to_gpio_TS7120(chip);
+	struct tsweim_gpio_priv *priv = to_gpio_tsweim(chip);
 	unsigned long flags;
 	int ret =0;
 
-	if (!IS_VALID_OFFSET(offset)) {
+	if (!(offset < priv->gpio_chip.ngpio)) {
 		printk("offset %d is invalid\n", offset);
-			 return -EINVAL;
+		return -EINVAL;
 	}
 
 	if (priv == NULL) {
@@ -188,20 +151,28 @@ static int TS7120_gpio_direction_output(struct gpio_chip *chip,
 	spin_lock_irqsave(&priv->lock, flags);
 
 	if (offset < 16) {
-		writew((1 << offset), priv->syscon + BANK_0_OUTPUT_ENABLE_SET_REG);
+		writew((1 << offset),
+		  priv->syscon + BANK_0_OUTPUT_ENABLE_SET_REG);
 
-		if (value)
-			writew((1 << offset), priv->syscon + BANK_0_OUTPUT_SET_REG);
-		else
-			writew((1 << offset), priv->syscon + BANK_0_OUTPUT_CLR_REG);
+		if (value) {
+			writew((1 << offset),
+			  priv->syscon + BANK_0_OUTPUT_SET_REG);
+		} else {
+			writew((1 << offset),
+			  priv->syscon + BANK_0_OUTPUT_CLR_REG);
+		}
 	} else {
 
-		writew((1 << (offset-16)), priv->syscon + BANK_1_OUTPUT_ENABLE_SET_REG);
+		writew((1 << (offset-16)),
+		  priv->syscon + BANK_1_OUTPUT_ENABLE_SET_REG);
 
-		if (value)
-			writew((1 << (offset-16)), priv->syscon + BANK_1_OUTPUT_SET_REG);
-		else
-			writew((1 << (offset-16)), priv->syscon + BANK_1_OUTPUT_CLR_REG);
+		if (value) {
+			writew((1 << (offset-16)),
+			  priv->syscon + BANK_1_OUTPUT_SET_REG);
+		} else {
+			writew((1 << (offset-16)),
+			  priv->syscon + BANK_1_OUTPUT_CLR_REG);
+		}
 	}
 
 	priv->direction[offset / 32] &= ~(1 << offset % 32);
@@ -210,13 +181,14 @@ static int TS7120_gpio_direction_output(struct gpio_chip *chip,
 	return ret;
 }
 
-static int TS7120_gpio_get(struct gpio_chip *chip, unsigned int offset)
+static int tsweim_gpio_get(struct gpio_chip *chip, unsigned int offset)
 {
-	struct TS7120_gpio_priv *priv = to_gpio_TS7120(chip);
+	struct tsweim_gpio_priv *priv = to_gpio_tsweim(chip);
 	uint16_t reg;
 
-	if (!IS_VALID_OFFSET(offset))
+	if (!(offset < priv->gpio_chip.ngpio)) {
 		return -EINVAL;
+	}
 
 	if (priv == NULL) {
 		printk("%s %d, priv is NULL!\n", __func__, __LINE__);
@@ -238,10 +210,10 @@ static int TS7120_gpio_get(struct gpio_chip *chip, unsigned int offset)
 
 }
 
-static void TS7120_gpio_set(struct gpio_chip *chip, unsigned int offset,
+static void tsweim_gpio_set(struct gpio_chip *chip, unsigned int offset,
 				 int value)
 {
-	struct TS7120_gpio_priv *priv = to_gpio_TS7120(chip);
+	struct tsweim_gpio_priv *priv = to_gpio_tsweim(chip);
 	unsigned long flags;
 
 	if (priv == NULL) {
@@ -253,26 +225,34 @@ static void TS7120_gpio_set(struct gpio_chip *chip, unsigned int offset,
 		  return;
 	}
 
-	if (!IS_VALID_OFFSET(offset))
+	if (!(offset < priv->gpio_chip.ngpio)) {
 		return;
+	}
 
 	if ((priv->direction[offset / 32] & (1 << offset % 32))) {
-		printk("DIO #%d is not an output\n", priv->gpio_chip.base + offset);
+		printk("DIO #%d is not an output\n",
+		  priv->gpio_chip.base + offset);
 		return;
 	}
 
 	spin_lock_irqsave(&priv->lock, flags);
 
 	if (offset < 16) {
-		if (value)
-			writew((1 << offset), priv->syscon + BANK_0_OUTPUT_SET_REG);
-		else
-			writew((1 << offset), priv->syscon + BANK_0_OUTPUT_CLR_REG);
+		if (value) {
+			writew((1 << offset),
+			  priv->syscon + BANK_0_OUTPUT_SET_REG);
+		} else {
+			writew((1 << offset),
+			  priv->syscon + BANK_0_OUTPUT_CLR_REG);
+		}
 	} else {
-		if (value)
-			writew((1 << (offset-16)), priv->syscon + BANK_1_OUTPUT_SET_REG);
-		else
-			writew((1 << (offset-16)), priv->syscon + BANK_1_OUTPUT_CLR_REG);
+		if (value) {
+			writew((1 << (offset-16)),
+			  priv->syscon + BANK_1_OUTPUT_SET_REG);
+		} else {
+			writew((1 << (offset-16)),
+			  priv->syscon + BANK_1_OUTPUT_CLR_REG);
+		}
 	}
 
 	spin_unlock_irqrestore(&priv->lock, flags);
@@ -281,47 +261,49 @@ static void TS7120_gpio_set(struct gpio_chip *chip, unsigned int offset,
 
 
 static const struct gpio_chip template_chip = {
-	.label			= "TS7120-gpio",
+	.label			= "tsweim-gpio",
 	.owner			= THIS_MODULE,
-	.get_direction		= TS7120_gpio_get_direction,
-	.direction_input	= TS7120_gpio_direction_input,
-	.direction_output	= TS7120_gpio_direction_output,
-	.get			= TS7120_gpio_get,
-	.set			= TS7120_gpio_set,
+	.get_direction		= tsweim_gpio_get_direction,
+	.direction_input	= tsweim_gpio_direction_input,
+	.direction_output	= tsweim_gpio_direction_output,
+	.get			= tsweim_gpio_get,
+	.set			= tsweim_gpio_set,
 	.base			= -1,
 	.can_sleep		= false,
 };
 
-static const struct of_device_id TS7120_gpio_of_match_table[] = {
+static const struct of_device_id tsweim_gpio_of_match_table[] = {
 	{
-		.compatible = "technologic,TS7120-gpio",
+		.compatible = "technologic,tsweim-gpio",
 		.compatible = "technologic,ts71xxweim-gpio",
 	},
 
 	{ /* sentinel */ },
 };
-MODULE_DEVICE_TABLE(of, TS7120_gpio_of_match_table);
+MODULE_DEVICE_TABLE(of, tsweim_gpio_of_match_table);
 
-static int TS7120_gpio_probe(struct platform_device *pdev)
+static int tsweim_gpio_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	const struct of_device_id *match;
-	struct TS7120_gpio_priv *priv;
+	struct tsweim_gpio_priv *priv;
 	u32 ngpio;
 	int base;
 	int ret;
 	void __iomem  *membase;
 	struct resource *res = 0;
 
-	match = of_match_device(TS7120_gpio_of_match_table, dev);
+	match = of_match_device(tsweim_gpio_of_match_table, dev);
 	if (!match)
 		return -EINVAL;
 
-	if (of_property_read_u32(dev->of_node, "ngpios", &ngpio))
-		ngpio = TS7120_NR_DIO;
+	if (of_property_read_u32(dev->of_node, "ngpios", &ngpio)) {
+		ngpio = TSWEIM_NR_DIO;
+	}
 
-	if (of_property_read_u32(dev->of_node, "base", &base))
-		base = TS7120_DIO_BASE;
+	if (of_property_read_u32(dev->of_node, "base", &base)) {
+		base = -1;
+	}
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 
@@ -339,12 +321,14 @@ static int TS7120_gpio_probe(struct platform_device *pdev)
 	}
 
 	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
-	if (!priv)
+	if (!priv) {
 		return -ENOMEM;
+	}
 
 	priv->syscon = membase;
 
-	pr_info("FPGA syscon mapped to 0x%08X, %d bytes\n", (unsigned int)priv->syscon, resource_size(res));
+	pr_info("FPGA syscon mapped to 0x%08X, %d bytes\n",
+	  (unsigned int)priv->syscon, resource_size(res));
 
 	memset(priv->direction, 0xFF, sizeof(priv->direction));
 	memset(priv->ovalue, 0, sizeof(priv->ovalue));
@@ -355,7 +339,7 @@ static int TS7120_gpio_probe(struct platform_device *pdev)
 
 	spin_lock_init(&priv->lock);
 	priv->gpio_chip = template_chip;
-	priv->gpio_chip.label = "TS7120-gpio";
+	priv->gpio_chip.label = "tsweim-gpio";
 	priv->gpio_chip.ngpio = ngpio;
 	priv->gpio_chip.base = base;
 	pdev->dev.platform_data = &priv;
@@ -375,24 +359,27 @@ static int TS7120_gpio_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int TS7120_gpio_remove(struct platform_device *pdev)
+static int tsweim_gpio_remove(struct platform_device *pdev)
 {
-	struct TS7120_gpio_priv *priv = platform_get_drvdata(pdev);
-	if (priv)
+	struct tsweim_gpio_priv *priv = platform_get_drvdata(pdev);
+
+	if (priv) {
 		gpiochip_remove(&priv->gpio_chip);
+	}
+
 	return 0;
 }
 
-static struct platform_driver TS7120_gpio_driver = {
+static struct platform_driver tsweim_gpio_driver = {
 	.driver = {
-		.name = "TS7120-gpio",
-		.of_match_table = of_match_ptr(TS7120_gpio_of_match_table),
+		.name = "tsweim-gpio",
+		.of_match_table = of_match_ptr(tsweim_gpio_of_match_table),
 	},
-	.probe = TS7120_gpio_probe,
-	.remove = TS7120_gpio_remove,
+	.probe = tsweim_gpio_probe,
+	.remove = tsweim_gpio_remove,
 };
-module_platform_driver(TS7120_gpio_driver);
+module_platform_driver(tsweim_gpio_driver);
 
 MODULE_AUTHOR("Technologic Systems");
-MODULE_DESCRIPTION("GPIO interface for Technologic Systems TS-7120 DIO");
+MODULE_DESCRIPTION("GPIO interface for Technologic Systems WEIM FPGA");
 MODULE_LICENSE("GPL");
