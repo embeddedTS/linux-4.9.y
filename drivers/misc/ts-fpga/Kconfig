@@ -1,0 +1,14 @@
+menu "TS-FPGA devices"
+
+config TS7120_FPGA
+	tristate "TS-7120 FPGA Support"
+	depends on m
+	default n
+	help
+	  Select this option if you have a Technologic Systems TS-7120 SBC.
+	  The driver is necessary if you want to use the devices that are
+	  present on that board's FPGA.
+
+	  If unsure, say N.
+
+endmenu
