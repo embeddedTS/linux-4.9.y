@@ -358,8 +358,19 @@
 			pinctrl-0 = <&mac0_pins_ts7400v2>;
 			phy-supply = <&reg_fec_3v3>;
 			phy-reset-gpios = <&gpio2 9 GPIO_ACTIVE_LOW>;
-			phy-reset-duration = <10>;
+			phy-reset-duration = <1>;
+			phy-handle = <&ethphy0>;
 			status = "okay";
+
+			mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				ethphy0: ethernet-phy@0 {
+				  compatible = "ethernet-phy-ieee802.3-c22";
+				  reg = <0>;
+				};
+			};
 		};
 	};
 
