@@ -68,6 +68,9 @@
 
 static void set_multicast_list(struct net_device *ndev);
 static void fec_enet_itr_coal_init(struct net_device *ndev);
+static int fec_reset_phy(struct platform_device *pdev);
+static int phy_reset = -1;
+static bool active_high = false;
 
 #define DRIVER_NAME	"fec"
 
@@ -1075,6 +1078,13 @@ fec_restart(struct net_device *ndev)
 		writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
 	else
 		writel(FEC_ENET_MII, fep->hwp + FEC_IMASK);
+
+	/* This driver tends to think its okay to just turn off and re-enable
+	 * the enet clk to the PHY. This is not okay, and a PHY reset needs to
+	 * be given after the clocks have been turned back on and the MAC has
+	 * been configured.
+	 */
+	fec_reset_phy(fep->pdev);
 
 	/* Init the interrupt coalescing */
 	fec_enet_itr_coal_init(ndev);
@@ -3215,39 +3225,56 @@ static int fec_enet_init(struct net_device *ndev)
 #ifdef CONFIG_OF
 static int fec_reset_phy(struct platform_device *pdev)
 {
-	int err, phy_reset;
-	bool active_high = false;
+	int err;
 	int msec = 1;
 	struct device_node *np = pdev->dev.of_node;
 
 	if (!np)
 		return 0;
 
-	of_property_read_u32(np, "phy-reset-duration", &msec);
-	/* A sane reset duration should not be longer than 1s */
-	if (msec > 1000)
-		msec = 1;
+	if (phy_reset < 0) {
+		of_property_read_u32(np, "phy-reset-duration", &msec);
+		/* A sane reset duration should not be longer than 1s */
+		if (msec > 1000)
+			msec = 1;
 
-	phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
-	if (phy_reset == -EPROBE_DEFER)
-		return phy_reset;
-	else if (!gpio_is_valid(phy_reset))
-		return 0;
+		phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
+		if (phy_reset == -EPROBE_DEFER)
+			return phy_reset;
+		else if (!gpio_is_valid(phy_reset))
+			return 0;
 
-	active_high = of_property_read_bool(np, "phy-reset-active-high");
+		active_high = of_property_read_bool(np, "phy-reset-active-high");
 
-	err = devm_gpio_request_one(&pdev->dev, phy_reset,
+		err = devm_gpio_request_one(&pdev->dev, phy_reset,
 			active_high ? GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW,
 			"phy-reset");
-	if (err) {
-		dev_err(&pdev->dev, "failed to get phy-reset-gpios: %d\n", err);
-		return err;
+		if (err) {
+			dev_err(&pdev->dev,
+				"failed to get phy-reset-gpios: %d\n", err);
+			return err;
+		}
+	} else { /* reset GPIO already obtained */
+		gpio_set_value_cansleep(phy_reset, active_high);
 	}
 
+	/* Use of m/udelay for such long periods of time is discouraged as it
+	 * tends to slow down the rest of the kernel. However using sleeps here
+	 * as the driver originally did would cause BUG_ON() warnings due to
+	 * the sleeps being scheduled in an atomic context when called from
+	 * fec_restart(). It would also cause issues with other kernel threads.
+	 * Resets won't happen often, so a small amount of delay here is fine.
+	 *
+	 * The real problem is that fec_reset_phy() is expected to only be
+	 * called once at probe() and provides no mechanism to reset the PHY at
+	 * any other time. This causes errors when FEC driver turns off the
+	 * enet clock, and then turns it back on expecting to talk to a sane
+	 * device.
+	 */
 	if (msec > 20)
-		msleep(msec);
+		mdelay(msec);
 	else
-		usleep_range(msec * 1000, msec * 1000 + 1000);
+		udelay(msec * 1000);
 
 	gpio_set_value_cansleep(phy_reset, !active_high);
 
