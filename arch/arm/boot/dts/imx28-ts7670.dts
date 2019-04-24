@@ -1,0 +1,501 @@
+/*
+ * Copyright (C) 2019 Technologic Systems <support@embeddedarm.com>
+ * Copyright (C) 2012 Marek Vasut <marex@denx.de>
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+#include "imx28.dtsi"
+#include "dt-bindings/gpio/gpio.h"
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+
+	model = "Technologic Systems i.MX28 TS-7670 (Default Device Tree)";
+	compatible = "fsl,imx28-ts7670", "fsl,imx28";
+
+	aliases {
+		i2c0 = &i2c0;
+	};
+
+	memory {
+		reg = <0x40000000 0x08000000>;   /* 128MB */
+	};
+
+	leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_gpio_leds>;
+		compatible = "gpio-leds";
+
+		green-led {
+			label = "green-led";
+			gpios = <&gpio0 28 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+		red-led {
+			label = "red-led";
+			gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		yellow-led {
+			label = "yellow-led";
+			gpios = <&gpio1 26 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		blue-led {
+			label = "blue-led";
+			gpios = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		/* The following are meant to be userspace controlled IO. The
+		 * kernel does not allow setting default state of GPIO, but
+		 * the default state of LEDs can be set, which is why the LED
+		 * subsystem is used.
+		 */
+		en-usb-5v {
+			label = "en-usb-5v";
+			gpios = <&gpio1 27 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+
+		en-gps-pwr {
+			label = "en-gps-pwr";
+			gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		en-rs232-xceiver {
+			label = "en-rs232-xceiver";
+			gpios = <&gpio1 25 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+	};
+
+
+	apb@80000000 {
+		apbh@80000000 {
+			/* SD 0 */
+			ssp0: ssp@80010000 {
+				compatible = "fsl,imx28-mmc";
+				pinctrl-names = "default";
+				pinctrl-0 = <&mmc0_4bit_pins>;
+				vmmc-supply = <&reg_vddio_sd0>;
+				bus-width = <4>;
+				broken-cd;
+				disable-wp;
+				status = "okay";
+			};
+
+			/* eMMC */
+			ssp1: ssp@80012000 {
+				compatible = "fsl,imx28-mmc";
+				pinctrl-names = "default";
+				pinctrl-0 = <&mmc1_4bit_pins>;
+				vmmc-supply = <&reg_vddio_sd0>;
+				bus-width = <4>;
+				broken-cd;
+				disable-wp;
+				non-removable;
+				status = "okay";
+			};
+
+			/* SD 1 */
+			ssp2: ssp@80014000 {
+				compatible = "fsl,imx28-mmc";
+				pinctrl-names = "default";
+				pinctrl-0 = <&mmc2_4bit_pins>;
+				vmmc-supply = <&reg_vddio_sd0>;
+				bus-width = <4>;
+				broken-cd;
+				disable-wp;
+				status = "okay";
+			};
+
+			pinctrl@80018000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&pinctrl_hog>;
+
+				pinctrl_hog: hoggrp {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  /* Push switch */
+					  MX28_PAD_LCD_D20__GPIO_1_20
+					  /* Boot strapping */
+					  MX28_PAD_LCD_D00__GPIO_1_0
+					  MX28_PAD_LCD_D02__GPIO_1_2
+					  MX28_PAD_LCD_D03__GPIO_1_3
+					  MX28_PAD_LCD_D04__GPIO_1_4
+					  MX28_PAD_LCD_D05__GPIO_1_5
+					  MX28_PAD_LCD_D06__GPIO_1_6
+					  /* DC DIO 4-6 */
+					  MX28_PAD_LCD_D07__GPIO_1_7
+					  MX28_PAD_LCD_D08__GPIO_1_8
+					  MX28_PAD_LCD_D09__GPIO_1_9
+					  /* Option strap 1-4 */
+					  MX28_PAD_GPMI_D07__GPIO_0_7
+					  MX28_PAD_LCD_D21__GPIO_1_21
+					  MX28_PAD_LCD_D19__GPIO_1_19
+					  MX28_PAD_LCD_D11__GPIO_1_11
+					  /* EN MODBUS 24 V */
+					  MX28_PAD_LCD_D13__GPIO_1_13
+					  /* MODBUS FAULT */
+					  MX28_PAD_LCD_D14__GPIO_1_14
+					  /* EN MODBUS 3V# */
+					  MX28_PAD_LCD_D15__GPIO_1_15
+					  /* GPS PPS Out */
+					  MX28_PAD_LCD_D16__GPIO_1_16
+					  /* HD2 pin 4,6-8 */
+					  MX28_PAD_GPMI_CE0N__GPIO_0_16
+					  MX28_PAD_GPMI_D06__GPIO_0_6
+					  MX28_PAD_LCD_D18__GPIO_1_18
+					  MX28_PAD_GPMI_D05__GPIO_0_5
+					  /* Auto485 clock
+					   * start as GPIO, tshwctl sets as PWM
+					   */
+					  MX28_PAD_GPMI_D05__GPIO_0_5
+					>;
+					fsl,drive-strength = <MXS_DRIVE_4mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				mmc0_4bit_pins: mmc0-4bit@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_SSP0_DATA0__SSP0_D0
+					  MX28_PAD_SSP0_DATA1__SSP0_D1
+					  MX28_PAD_SSP0_DATA2__SSP0_D2
+					  MX28_PAD_SSP0_DATA3__SSP0_D3
+					  MX28_PAD_SSP0_CMD__SSP0_CMD
+					  MX28_PAD_SSP0_SCK__SSP0_SCK
+					  /* EN SD Power */
+					  MX28_PAD_PWM3__GPIO_3_28
+					>;
+					fsl,drive-strength = <MXS_DRIVE_8mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				mmc1_4bit_pins: mmc1-4bit@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_GPMI_D00__SSP1_D0
+					  MX28_PAD_GPMI_D01__SSP1_D1
+					  MX28_PAD_GPMI_D02__SSP1_D2
+					  MX28_PAD_GPMI_D03__SSP1_D3
+					  MX28_PAD_GPMI_RDY1__SSP1_CMD
+					  MX28_PAD_GPMI_WRN__SSP1_SCK
+					>;
+					fsl,drive-strength = <MXS_DRIVE_8mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				mmc2_4bit_pins: mmc2-4bit@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_SSP0_DATA4__SSP2_D0
+					  MX28_PAD_SSP2_SS1__SSP2_D1
+					  MX28_PAD_SSP2_SS2__SSP2_D2
+					  MX28_PAD_SSP0_DATA5__SSP2_D3
+					  MX28_PAD_SSP0_DATA6__SSP2_CMD
+					  /* For some reason, using the imx28
+					   * .dtsi pinctrl definition of
+					   * mmc2_sck_cfg or mmc2_4bit_pins_a
+					   * does not properly set the clock mux
+					   * However, setting it here works.
+					   */
+					  MX28_PAD_SSP0_DATA7__SSP2_SCK
+					>;
+					fsl,drive-strength = <MXS_DRIVE_8mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				mac0_pins_ts7670: mac0@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_ENET0_MDC__ENET0_MDC
+					  MX28_PAD_ENET0_MDIO__ENET0_MDIO
+					  MX28_PAD_ENET0_RX_EN__ENET0_RX_EN
+					  MX28_PAD_ENET0_RXD0__ENET0_RXD0
+					  MX28_PAD_ENET0_RXD1__ENET0_RXD1
+					  MX28_PAD_ENET0_TX_EN__ENET0_TX_EN
+					  MX28_PAD_ENET0_TXD0__ENET0_TXD0
+					  MX28_PAD_ENET0_TXD1__ENET0_TXD1
+					  MX28_PAD_ENET_CLK__CLKCTRL_ENET
+					  /* PHY reset */
+					  MX28_PAD_SSP0_DETECT__GPIO_2_9
+					  /* PHY power */
+					  MX28_PAD_LCD_D10__GPIO_1_10
+					>;
+					fsl,drive-strength = <MXS_DRIVE_8mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				auart4_2pins: auart4@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_SAIF0_BITCLK__AUART4_RX
+					  MX28_PAD_SAIF0_SDATA0__AUART4_TX
+					>;
+					fsl,drive-strength = <MXS_DRIVE_4mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_DISABLE>;
+				};
+
+				auart1_2pins_gpio_rtscts: auart1-rtscts@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_AUART1_RX__AUART1_RX
+					  MX28_PAD_AUART1_TX__AUART1_TX
+					  /* AUART1 RTS GPIO */
+					  MX28_PAD_LCD_D23__GPIO_1_23
+					  /* AUART1 CTS GPIO */
+					  MX28_PAD_LCD_D22__GPIO_1_22
+					>;
+					fsl,drive-strength = <MXS_DRIVE_4mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_DISABLE>;
+				};
+
+				pinctrl_flexcan_3v3: en-can@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  MX28_PAD_LCD_RESET__GPIO_3_30
+					>;
+					fsl,drive-strength = <MXS_DRIVE_4mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_ENABLE>;
+				};
+
+				pinctrl_gpio_leds: gpio-led@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+					  /* Red LED */
+					  MX28_PAD_GPMI_CE1N__GPIO_0_17
+					  /* Green LED */
+					  MX28_PAD_GPMI_RESETN__GPIO_0_28
+					  /* Yellow LED */
+					  MX28_PAD_LCD_RS__GPIO_1_26
+					  /* Blue LED */
+					  MX28_PAD_LCD_RD_E__GPIO_1_24
+					  /* USB 5V EN */
+					  MX28_PAD_LCD_CS__GPIO_1_27
+					  /* GPS radio power */
+					  MX28_PAD_LCD_D01__GPIO_1_1
+					  /* EN 232 transceiver */
+					  MX28_PAD_LCD_WR_RWN__GPIO_1_25
+					>;
+					fsl,drive-strength = <MXS_DRIVE_12mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_DISABLE>;
+				};
+			};
+
+			can0: can@80032000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&can0_pins_a>;
+				xceiver-supply = <&reg_flexcan_3v3>;
+				status = "okay";
+			};
+
+			can1: can@80034000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&can1_pins_a>;
+				xceiver-supply = <&reg_flexcan_3v3>;
+				status = "okay";
+			};
+
+		};
+
+		apbx@80040000 {
+			saif0: saif@80042000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&saif0_pins_a>;
+				status = "disabled";
+			};
+
+			saif1: saif@80046000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&saif1_pins_a>;
+				fsl,saif-master = <&saif0>;
+				status = "disabled";
+			};
+
+			lradc: lradc@80050000 {
+				status = "okay";
+			};
+
+			i2c0: i2c@80058000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&i2c0_pins_a>;
+				clock-frequency = <100000>;
+				status = "okay";
+
+				rtc: isl12022@6f {
+					compatible = "isil,isl12022";
+					reg = <0x6f>;
+				};
+
+				silabs: silabs@78 {
+					compatible = "ts-wdt";
+					reg = <0x78>;
+				};
+			};
+
+			duart: serial@80074000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&duart_pins_a>;
+				status = "okay";
+			};
+
+			usbphy0: usbphy@8007c000 {
+				phy-3p0-supply = <&reg_usbphy_vbus>;
+				status = "okay";
+
+			};
+
+			usbphy1: usbphy@8007e000 {
+				phy-3p0-supply = <&reg_usbphy_vbus>;
+				status = "okay";
+			};
+
+			auart0: serial@8006a000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&auart0_pins_a>;
+				status = "okay";
+			};
+
+			auart1: serial@8006c000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&auart1_2pins_gpio_rtscts>;
+				rts-gpios = <&gpio1 23 GPIO_ACTIVE_LOW>;
+				cts-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
+				status = "okay";
+			};
+
+			auart2: serial@8006e000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&auart2_2pins_a>;
+				status = "okay";
+			};
+
+			auart3: serial@80070000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&auart3_2pins_a>;
+				status = "okay";
+			};
+
+			auart4: serial@80072000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&auart4_2pins>;
+				status = "okay";
+			};
+
+			pwm: pwm@80064000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&pwm2_pins_a>;
+				status = "okay";
+			};
+		};
+	};
+
+	ahb@80080000 {
+		usb0: usb@80080000 {
+			disable-over-current;
+			dr_mode = "host";
+			status = "okay";
+		};
+
+		usb1: usb@80090000 {
+			disable-over-current;
+			dr_mode = "host";
+			status = "okay";
+		};
+
+		mac0: ethernet@800f0000 {
+			phy-mode = "rmii";
+			pinctrl-names = "default";
+			pinctrl-0 = <&mac0_pins_ts7670>;
+			phy-supply = <&reg_fec_3v3>;
+			phy-reset-gpios = <&gpio2 9 GPIO_ACTIVE_LOW>;
+			/* PHY reset hold is 100 us, however, power enable to
+			 * first unreset is 25 ms minimum. Increase every reset
+			 * to accommodate this power-on situation.
+			 */
+			phy-reset-duration = <26>;
+			phy-handle = <&ethphy0>;
+			status = "okay";
+
+			mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				ethphy0: ethernet-phy@0 {
+				  compatible = "ethernet-phy-ieee802.3-c22";
+				  reg = <0>;
+				};
+			};
+		};
+	};
+
+	regulators {
+		compatible = "simple-bus";
+
+		reg_3p3v: 3p3v {
+			compatible = "regulator-fixed";
+			regulator-name = "3P3V";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
+		};
+
+		reg_vddio_sd0: vddio-sd0 {
+			compatible = "regulator-fixed";
+			regulator-name = "sd_vmmc";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-boot-on;
+			gpio = <&gpio3 28 GPIO_ACTIVE_LOW>;
+		};
+
+		reg_usbphy_vbus: usbphy_vbus {
+			compatible = "regulator-dummy";
+			regulator-name = "usbphy_vbus_dummy";
+			regulator-always-on;
+		};
+
+
+		reg_fec_3v3: enet_vbus {
+			compatible = "regulator-fixed";
+			regulator-name = "enet_vbus";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio = <&gpio1 10 GPIO_ACTIVE_LOW>;
+		};
+
+		reg_flexcan_3v3: en-can@0 {
+			compatible = "regulator-fixed";
+			regulator-name = "en-can";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_flexcan_3v3>;
+			regulator-min-microvolt = <3000000>;
+			regulator-max-microvolt = <3000000>;
+			gpio = <&gpio3 30 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+
