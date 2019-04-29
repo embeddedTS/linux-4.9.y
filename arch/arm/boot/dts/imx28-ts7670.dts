@@ -159,10 +159,6 @@
 					  MX28_PAD_GPMI_D06__GPIO_0_6
 					  MX28_PAD_LCD_D18__GPIO_1_18
 					  MX28_PAD_GPMI_D05__GPIO_0_5
-					  /* Auto485 clock
-					   * start as GPIO, tshwctl sets as PWM
-					   */
-					  MX28_PAD_GPMI_D05__GPIO_0_5
 					>;
 					fsl,drive-strength = <MXS_DRIVE_4mA>;
 					fsl,voltage = <MXS_VOLTAGE_HIGH>;
