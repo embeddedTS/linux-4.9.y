@@ -358,7 +358,11 @@
 			pinctrl-0 = <&mac0_pins_ts7400v2>;
 			phy-supply = <&reg_fec_3v3>;
 			phy-reset-gpios = <&gpio2 9 GPIO_ACTIVE_LOW>;
-			phy-reset-duration = <1>;
+			/* PHY reset hold is 100 us, however, power enable to
+			 * first unreset is 25 ms minimum. Increase every reset
+			 * to accommodate this power-on situation.
+			 */
+			phy-reset-duration = <26>;
 			phy-handle = <&ethphy0>;
 			status = "okay";
 
