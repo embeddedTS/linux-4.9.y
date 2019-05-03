@@ -195,6 +195,7 @@ static void process_transfers(unsigned long data)
 	/* read control register */
 	ctrl  = spioc_read(spioc, SPIOC_CTRL);
 	ctrl &= ~CTRL_LEN(127);    /* clear length bits */
+	ctrl &= ~CTRL_ASS;         /* Disable automatic CS control */
 	ctrl |= CTRL_IE            /* assert interrupt on completion */
 		  |  CTRL_LEN(rem * 8); /* set word length */
 	spioc_write(spioc, SPIOC_CTRL, ctrl);
