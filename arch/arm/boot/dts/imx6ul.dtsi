@@ -851,6 +851,13 @@
 				reg = <0x021b0000 0x4000>;
 			};
 
+			weim: weim@021b8000 {
+				compatible = "fsl,imx6ul-weim", "fsl,imx6q-weim";
+				reg = <0x021b8000 0x4000>;
+				interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&clks IMX6UL_CLK_DUMMY>;
+			};
+
 			lcdif: lcdif@021c8000 {
 				compatible = "fsl,imx6ul-lcdif", "fsl,imx28-lcdif";
 				reg = <0x021c8000 0x4000>;
