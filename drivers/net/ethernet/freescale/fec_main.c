@@ -69,6 +69,7 @@
 static void set_multicast_list(struct net_device *ndev);
 static void fec_enet_itr_coal_init(struct net_device *ndev);
 static int fec_reset_phy(struct platform_device *pdev);
+static int fec_assert_phy_reset(struct platform_device *pdev);
 static int phy_reset = -1;
 static bool active_high = false;
 
@@ -84,6 +85,8 @@ static bool active_high = false;
 #define FEC_ENET_RAFL_V	0x8
 #define FEC_ENET_OPD_V	0xFFF0
 #define FEC_MDIO_PM_TIMEOUT  100 /* ms */
+
+#define FEC_LINK_TIMEOUT	5000
 
 static struct platform_device_id fec_devtype[] = {
 	{
@@ -909,6 +912,13 @@ fec_restart(struct net_device *ndev)
 	u32 rcntl = OPT_FRAME_SIZE | 0x04;
 	u32 ecntl = 0x2; /* ETHEREN */
 
+#ifdef CONFIG_MX28_ENET_ISSUE
+	if (fec_assert_phy_reset(fep->pdev) < 0) {
+		printk(KERN_ERR
+		  "fec_main: Attempting to reset PHY before GPIO obtained\n");
+	}
+#endif
+
 	/* Whack a reset.  We should wait for this.
 	 * For i.MX6SX SOC, enet use AXI bus, we use disable MAC
 	 * instead of reset MAC itself.
@@ -917,7 +927,7 @@ fec_restart(struct net_device *ndev)
 		writel(0, fep->hwp + FEC_ECNTRL);
 	} else {
 		writel(1, fep->hwp + FEC_ECNTRL);
-		udelay(10);
+		while(readl(fep->hwp + FEC_ECNTRL)&1);
 	}
 
 	/*
@@ -1079,12 +1089,14 @@ fec_restart(struct net_device *ndev)
 	else
 		writel(FEC_ENET_MII, fep->hwp + FEC_IMASK);
 
+#ifdef CONFIG_MX28_ENET_ISSUE
 	/* This driver tends to think its okay to just turn off and re-enable
 	 * the enet clk to the PHY. This is not okay, and a PHY reset needs to
 	 * be given after the clocks have been turned back on and the MAC has
 	 * been configured.
 	 */
 	fec_reset_phy(fep->pdev);
+#endif
 
 	/* Init the interrupt coalescing */
 	fec_enet_itr_coal_init(ndev);
@@ -1116,7 +1128,7 @@ fec_stop(struct net_device *ndev)
 			writel(0, fep->hwp + FEC_ECNTRL);
 		} else {
 			writel(1, fep->hwp + FEC_ECNTRL);
-			udelay(10);
+			while(readl(fep->hwp + FEC_ECNTRL)&1);
 		}
 		writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
 	} else {
@@ -1136,6 +1148,11 @@ fec_stop(struct net_device *ndev)
 		writel(2, fep->hwp + FEC_ECNTRL);
 		writel(rmii_mode, fep->hwp + FEC_R_CNTRL);
 	}
+
+#ifdef CONFIG_MX28_ENET_ISSUE
+	/* Reset issued here to match the fixes to the 2.6 kernel */
+	fec_reset_phy(fep->pdev);
+#endif
 }
 
 
@@ -1750,14 +1767,38 @@ static void fec_enet_adjust_link(struct net_device *ndev)
 		}
 
 		/* if any of the above changed restart the FEC */
-		if (status_change) {
+#ifdef CONFIG_MX28_ENET_ISSUE
+		/* These changes were adapted from the fixes done to our 2.6
+		 * kernel for i.MX28 devices.
+		 * The change here is to add a timeout. Essentially force the
+		 * whole kernel to think we have link for at least 5 s to let
+		 * the PHY establish and confirm link. If this timeout is
+		 * exceeded then the whole MAC+PHY can be restarted again.
+		 * This timeout is used in genphy_update_link()
+		 */
+		if ((status_change) && (!phy_dev->reset_done)) {
 			napi_disable(&fep->napi);
 			netif_tx_lock_bh(ndev);
+			phy_dev->reset_done = 1;
+			phy_dev->reset_timeout = jiffies +
+				msecs_to_jiffies(FEC_LINK_TIMEOUT);
 			fec_restart(ndev);
+			phy_print_status(phy_dev);
 			netif_tx_wake_all_queues(ndev);
 			netif_tx_unlock_bh(ndev);
 			napi_enable(&fep->napi);
 		}
+#else
+		if (status_change) {
+			napi_disable(&fep->napi);
+			netif_tx_lock_bh(ndev);
+			fec_restart(ndev);
+			phy_print_status(phy_dev);
+			netif_tx_wake_all_queues(ndev);
+			netif_tx_unlock_bh(ndev);
+			napi_enable(&fep->napi);
+		}
+#endif
 	} else {
 		if (fep->link) {
 			napi_disable(&fep->napi);
@@ -1766,12 +1807,9 @@ static void fec_enet_adjust_link(struct net_device *ndev)
 			netif_tx_unlock_bh(ndev);
 			napi_enable(&fep->napi);
 			fep->link = phy_dev->link;
-			status_change = 1;
+			phy_print_status(phy_dev);
 		}
 	}
-
-	if (status_change)
-		phy_print_status(phy_dev);
 }
 
 static int fec_enet_mdio_read(struct mii_bus *bus, int mii_id, int regnum)
@@ -3223,6 +3261,16 @@ static int fec_enet_init(struct net_device *ndev)
 }
 
 #ifdef CONFIG_OF
+static int fec_assert_phy_reset(struct platform_device *pdev)
+{
+	if (phy_reset >= 0) {
+		gpio_set_value_cansleep(phy_reset, active_high);
+		return 0;
+	} else {
+		return -EIO;
+	}
+}
+
 static int fec_reset_phy(struct platform_device *pdev)
 {
 	int err;
@@ -3232,6 +3280,11 @@ static int fec_reset_phy(struct platform_device *pdev)
 	if (!np)
 		return 0;
 
+	/* The ethernet fixes here are not set behind the #ifdef macro like
+	 * in other areas. This is due to the changes here being pretty agnostic
+	 * and just in general allows this function to be called multiple times
+	 * safely.
+	 */
 	if (phy_reset < 0) {
 		of_property_read_u32(np, "phy-reset-duration", &msec);
 		/* A sane reset duration should not be longer than 1s */
@@ -3278,9 +3331,16 @@ static int fec_reset_phy(struct platform_device *pdev)
 
 	gpio_set_value_cansleep(phy_reset, !active_high);
 
+	/* Max 800 ns from nRST deassertion to output drive from LAN8720A */
+	udelay(1);
+
 	return 0;
 }
 #else /* CONFIG_OF */
+static int fec_assert_phy_reset(struct platform_device *pdev)
+{
+	return 0;
+}
 static int fec_reset_phy(struct platform_device *pdev)
 {
 	/*

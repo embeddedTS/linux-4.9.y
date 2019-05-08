@@ -24,3 +24,12 @@ config ARCH_MXS
 	select STMP_DEVICE
 	help
 	  Support for Freescale MXS-based family of processors
+
+config MX28_ENET_ISSUE
+	bool "Enable MX28 enet issue fix - Read help!"
+	depends on SOC_IMX28
+	default y
+	help
+	  Say Y to enable a fix for link up/down issue on mx28.
+	  It is STRONGLY! recommended to always have external oscillators
+	  provide the clock to ENET PHY and FEC unit.
