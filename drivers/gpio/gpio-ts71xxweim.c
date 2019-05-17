@@ -34,6 +34,12 @@
 #define BANK_1_OUTPUT_CLR_REG 0x44
 #define BANK_1_OUTPUT_ENABLE_CLR_REG 0x46
 
+#define BANK_2_OUTPUT_SET_REG 0x50
+#define BANK_2_OUTPUT_GET_REG 0x50
+#define BANK_2_OUTPUT_ENABLE_SET_REG 0x52
+#define BANK_2_OUTPUT_CLR_REG 0x54
+#define BANK_2_OUTPUT_ENABLE_CLR_REG 0x56
+
 
 struct tsweim_gpio_priv {
 	void __iomem  *syscon;
@@ -59,6 +65,11 @@ struct tsweim_gpio_priv {
 		Offset 0x44:  Data Clear
 		Offset 0x46:  Output Enable Clear
 
+	Bank 2:
+		Offset 0x50:  Data Set (write) or Pin State (read)
+		Offset 0x52:  Output Enable Set
+		Offset 0x54:  Data Clear
+		Offset 0x56:  Output Enable Clear
 */
 
 static inline struct tsweim_gpio_priv *to_gpio_tsweim(struct gpio_chip *chip)
@@ -116,9 +127,12 @@ static int tsweim_gpio_direction_input(struct gpio_chip *chip,
 	if (offset < 16) {
 		writew((1 << offset),
 		  priv->syscon + BANK_0_OUTPUT_ENABLE_CLR_REG);
-	} else {
+	} else if (offset < 32) {
 		writew((1 << (offset-16)),
 		  priv->syscon + BANK_1_OUTPUT_ENABLE_CLR_REG);
+	} else {
+		writew((1 << (offset-32)),
+		  priv->syscon + BANK_2_OUTPUT_ENABLE_CLR_REG);
 	}
 
 	spin_unlock_irqrestore(&priv->lock, flags);
@@ -161,8 +175,7 @@ static int tsweim_gpio_direction_output(struct gpio_chip *chip,
 			writew((1 << offset),
 			  priv->syscon + BANK_0_OUTPUT_CLR_REG);
 		}
-	} else {
-
+	} else if (offset < 32) {
 		writew((1 << (offset-16)),
 		  priv->syscon + BANK_1_OUTPUT_ENABLE_SET_REG);
 
@@ -172,6 +185,17 @@ static int tsweim_gpio_direction_output(struct gpio_chip *chip,
 		} else {
 			writew((1 << (offset-16)),
 			  priv->syscon + BANK_1_OUTPUT_CLR_REG);
+		}
+	} else {
+		writew((1 << (offset-32)),
+		  priv->syscon + BANK_2_OUTPUT_ENABLE_SET_REG);
+
+		if (value) {
+			writew((1 << (offset-32)),
+			  priv->syscon + BANK_2_OUTPUT_SET_REG);
+		} else {
+			writew((1 << (offset-32)),
+			  priv->syscon + BANK_2_OUTPUT_CLR_REG);
 		}
 	}
 
@@ -203,9 +227,12 @@ static int tsweim_gpio_get(struct gpio_chip *chip, unsigned int offset)
 	if (offset < 16) {
 		reg = readw(priv->syscon + BANK_0_OUTPUT_GET_REG);
 		return !!(reg & (1 << offset));
-	} else {
+	} else if (offset < 32)  {
 		reg = readw(priv->syscon + BANK_1_OUTPUT_GET_REG);
 		return !!(reg & (1 << (offset-16)));
+	} else {
+		reg = readw(priv->syscon + BANK_2_OUTPUT_GET_REG);
+		return !!(reg & (1 << (offset-32)));
 	}
 
 }
@@ -245,13 +272,21 @@ static void tsweim_gpio_set(struct gpio_chip *chip, unsigned int offset,
 			writew((1 << offset),
 			  priv->syscon + BANK_0_OUTPUT_CLR_REG);
 		}
-	} else {
+	} else if (offset < 32) {
 		if (value) {
 			writew((1 << (offset-16)),
 			  priv->syscon + BANK_1_OUTPUT_SET_REG);
 		} else {
 			writew((1 << (offset-16)),
 			  priv->syscon + BANK_1_OUTPUT_CLR_REG);
+		}
+	} else {
+		if (value) {
+			writew((1 << (offset-32)),
+			  priv->syscon + BANK_2_OUTPUT_SET_REG);
+		} else {
+			writew((1 << (offset-32)),
+			  priv->syscon + BANK_2_OUTPUT_CLR_REG);
 		}
 	}
 
@@ -336,6 +371,7 @@ static int tsweim_gpio_probe(struct platform_device *pdev)
 
 	writew(0xffff, priv->syscon + BANK_0_OUTPUT_ENABLE_CLR_REG);
 	writew(0xffff, priv->syscon + BANK_1_OUTPUT_ENABLE_CLR_REG);
+	writew(0xffff, priv->syscon + BANK_2_OUTPUT_ENABLE_CLR_REG);
 
 	spin_lock_init(&priv->lock);
 	priv->gpio_chip = template_chip;
