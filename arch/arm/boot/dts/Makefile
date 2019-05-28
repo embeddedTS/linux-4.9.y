@@ -468,6 +468,7 @@ dtb-$(CONFIG_ARCH_MXS) += \
 	imx28-m28evk.dtb \
 	imx28-sps1.dtb \
 	imx28-ts7680.dtb \
+	imx28-ts7682.dtb \
 	imx28-ts7400v2.dtb \
 	imx28-ts7670.dtb \
 	imx28-tx28.dtb
