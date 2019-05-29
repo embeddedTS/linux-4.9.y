@@ -174,7 +174,6 @@ static void process_transfers(unsigned long data)
 						struct spi_transfer,
 						transfer_list);
 			} else {
-				spioc->message->actual_length = spioc->nx;
 				complete(spioc->message->context);
 				spioc->transfer = NULL;
 				spioc->message->status = 0;
@@ -185,6 +184,7 @@ static void process_transfers(unsigned long data)
 
 		spioc->transfer = transfer;
 		spioc->nx = 0;
+		spioc->message->actual_length += transfer->len;
 	}
 
 	/* write data to registers */
