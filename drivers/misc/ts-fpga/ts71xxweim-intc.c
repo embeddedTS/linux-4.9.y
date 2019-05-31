@@ -34,61 +34,65 @@
 */
 
 
-#define DRIVER_NAME "ts7120-intc"
+#define TSWEIM_IRQ_STATUS		0x24
+#define TSWEIM_IRQ_MASK			0x48
+#define TSWEIM_NUM_FPGA_IRQ	17
 
-#define TS7120_IRQ_STATUS		0x24
-#define TS7120_IRQ_MASK			0x48
-#define TS7120_NUM_FPGA_IRQ	17
-
-static struct TS7120_intc_priv {
+static struct tsweim_intc_priv {
 	void __iomem  *syscon;
 	struct irq_domain *irqdomain;
 	int irq;
 	u32 mask;
 } priv;
 
-static const struct of_device_id TS7120_intc_of_match_table[] = {
+static const struct of_device_id tsweim_intc_of_match_table[] = {
 	{
 		.compatible = "technologic,TS7120-intc",
+		.compatible = "technologic,ts71xxweim-intc",
 	},
 
 	{ /* sentinel */ },
 };
-MODULE_DEVICE_TABLE(of, TS7120_intc_of_match_table);
+MODULE_DEVICE_TABLE(of, tsweim_intc_of_match_table);
 
 static void ts7120_intc_mask(struct irq_data *d)
 {
+	unsigned int mask;
 	if (priv.syscon) {
-		unsigned int mask = readl(priv.syscon + TS7120_IRQ_MASK) & ~BIT(d->hwirq) ;
+		mask = readl(priv.syscon + TSWEIM_IRQ_MASK) & ~BIT(d->hwirq) ;
 		priv.mask = mask;
-		writel(mask, priv.syscon + TS7120_IRQ_MASK);
+		writel(mask, priv.syscon + TSWEIM_IRQ_MASK);
 	}
 }
 
 static void ts7120_intc_unmask(struct irq_data *d)
 {
+	unsigned int mask;
 	if (priv.syscon) {
-		unsigned int mask = readl(priv.syscon + TS7120_IRQ_MASK) | BIT(d->hwirq) ;
+		mask = readl(priv.syscon + TSWEIM_IRQ_MASK) | BIT(d->hwirq) ;
 		priv.mask = mask;
-		writel(mask, priv.syscon + TS7120_IRQ_MASK);
+		writel(mask, priv.syscon + TSWEIM_IRQ_MASK);
 	}
 }
 
-static void  ts7120_irq_handler(struct irq_desc *desc)
+static void ts7120_irq_handler(struct irq_desc *desc)
 {
 	struct irq_chip *chip = irq_desc_get_chip(desc);
 	unsigned int irq;
+	unsigned int status;
 
 	chained_irq_enter(chip, desc);
 
 	if (priv.syscon) {
-		unsigned int status;
 
-		while ((status = (priv.mask & readl(priv.syscon + TS7120_IRQ_STATUS)))) {
+		while ((status =
+		  (priv.mask & readl(priv.syscon + TSWEIM_IRQ_STATUS)))) {
 			irq = 0;
 			do {
-				if (status & 1)
-					generic_handle_irq(irq_linear_revmap(priv.irqdomain, irq));
+				if (status & 1) {
+					generic_handle_irq(irq_linear_revmap(
+					  priv.irqdomain, irq));
+				}
 				status >>= 1;
 				irq++;
 			} while (status);
@@ -121,7 +125,7 @@ static struct irq_domain_ops ts7120_intc_irqdomain_ops = {
 };
 
 
-static int TS7120_intc_probe(struct platform_device *pdev)
+static int tsweim_intc_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	const struct of_device_id *match;
@@ -129,7 +133,7 @@ static int TS7120_intc_probe(struct platform_device *pdev)
 	void __iomem  *membase;
 	struct resource *res = 0;
 
-	match = of_match_device(TS7120_intc_of_match_table, dev);
+	match = of_match_device(tsweim_intc_of_match_table, dev);
 	if (!match)
 		return -EINVAL;
 
@@ -157,8 +161,8 @@ static int TS7120_intc_probe(struct platform_device *pdev)
 	priv.irq = res->start;
 	priv.syscon = membase;
 
-	priv.irqdomain = irq_domain_add_linear(np, TS7120_NUM_FPGA_IRQ,
-						 &ts7120_intc_irqdomain_ops, &priv);
+	priv.irqdomain = irq_domain_add_linear(
+	  np, TSWEIM_NUM_FPGA_IRQ, &ts7120_intc_irqdomain_ops, &priv);
 
 	if (!priv.irqdomain) {
 		pr_err("%s: unable to add irq domain\n", np->name);
@@ -166,7 +170,7 @@ static int TS7120_intc_probe(struct platform_device *pdev)
 	}
 
 	priv.mask = 0;
-	writel(0, priv.syscon + TS7120_IRQ_MASK);
+	writel(0, priv.syscon + TSWEIM_IRQ_MASK);
 
 	irq_set_handler_data(priv.irq, &priv);
 	irq_set_chained_handler(priv.irq, ts7120_irq_handler);
@@ -178,13 +182,14 @@ static int TS7120_intc_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int TS7120_intc_remove(struct platform_device *pdev)
+static int tsweim_intc_remove(struct platform_device *pdev)
 {
 	if (priv.irqdomain) {
 		int i, irq;
-		for(i=0; i < TS7120_NUM_FPGA_IRQ; i++) {
-			if ((irq = irq_find_mapping(	priv.irqdomain, i)) > 0)
+		for(i=0; i < TSWEIM_NUM_FPGA_IRQ; i++) {
+			if ((irq = irq_find_mapping(priv.irqdomain, i)) > 0) {
 				irq_dispose_mapping(irq);
+			}
 		}
 		irq_domain_remove(priv.irqdomain);
 		priv.irqdomain = NULL;
@@ -194,16 +199,16 @@ static int TS7120_intc_remove(struct platform_device *pdev)
 }
 
 
-static struct platform_driver TS7120_intc_driver = {
+static struct platform_driver tsweim_intc_driver = {
 	.driver = {
-		.name = "TS7120-intc",
-		.of_match_table = of_match_ptr(TS7120_intc_of_match_table),
+		.name = "tsweim-intc",
+		.of_match_table = of_match_ptr(tsweim_intc_of_match_table),
 	},
-	.probe = TS7120_intc_probe,
-	.remove = TS7120_intc_remove,
+	.probe = tsweim_intc_probe,
+	.remove = tsweim_intc_remove,
 };
-module_platform_driver(TS7120_intc_driver);
+module_platform_driver(tsweim_intc_driver);
 
 MODULE_AUTHOR("Technologic Systems");
-MODULE_DESCRIPTION("Interrupt Controller for Technologic Systems TS-7120 FPGA");
+MODULE_DESCRIPTION("Interrupt Controller for Technologic Systems WEIM FPGA");
 MODULE_LICENSE("GPL");

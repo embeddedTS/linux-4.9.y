@@ -1,2 +1,2 @@
-obj-$(CONFIG_TS7120_FPGA)	+= ts7120-intc.o
+obj-$(CONFIG_TSWEIM_FPGA_INTC)	+= ts71xxweim-intc.o
 
