@@ -1,0 +1,102 @@
+/*
+ * Copyright (C) 2016 Technologic Systems
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include <dt-bindings/input/input.h>
+
+/ {
+
+   mxcfb0: fb@0 {
+		compatible = "fsl,mxc_sdc_fb";
+		disp_dev = "lcd";
+		interface_pix_fmt = "RGB24";
+		mode_str ="OKAYA-WVGA";
+		default_bpp = <16>;
+		int_clk = <0>;
+		late_init = <0>;
+		status = "okay";
+	};
+
+};
+
+
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ts4100_pinctrl_hog>;
+	imx6ul-ts4100 {
+	
+		pinctrl_lcdif_ctrl: lcdifctrlgrp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_CLK__LCDIF_CLK	    0x79
+				MX6UL_PAD_LCD_ENABLE__LCDIF_ENABLE  0x79
+				MX6UL_PAD_LCD_HSYNC__LCDIF_HSYNC    0x79
+				MX6UL_PAD_LCD_VSYNC__LCDIF_VSYNC    0x79				
+			>;
+		};
+
+		pinctrl_lcdif_dat: lcdifdatgrp {
+			fsl,pins = <				
+				MX6UL_PAD_LCD_DATA02__LCDIF_DATA02  0x79
+				MX6UL_PAD_LCD_DATA03__LCDIF_DATA03  0x79
+				MX6UL_PAD_LCD_DATA04__LCDIF_DATA04  0x79
+				MX6UL_PAD_LCD_DATA05__LCDIF_DATA05  0x79
+				MX6UL_PAD_LCD_DATA06__LCDIF_DATA06  0x79
+				MX6UL_PAD_LCD_DATA07__LCDIF_DATA07  0x79
+				
+				MX6UL_PAD_LCD_DATA10__LCDIF_DATA10  0x79
+				MX6UL_PAD_LCD_DATA11__LCDIF_DATA11  0x79
+				MX6UL_PAD_LCD_DATA12__LCDIF_DATA12  0x79
+				MX6UL_PAD_LCD_DATA13__LCDIF_DATA13  0x79
+				MX6UL_PAD_LCD_DATA14__LCDIF_DATA14  0x79
+				MX6UL_PAD_LCD_DATA15__LCDIF_DATA15  0x79
+				
+				MX6UL_PAD_LCD_DATA18__LCDIF_DATA18  0x79
+				MX6UL_PAD_LCD_DATA19__LCDIF_DATA19  0x79
+				MX6UL_PAD_LCD_DATA20__LCDIF_DATA20  0x79
+				MX6UL_PAD_LCD_DATA21__LCDIF_DATA21  0x79
+				MX6UL_PAD_LCD_DATA22__LCDIF_DATA22  0x79
+				MX6UL_PAD_LCD_DATA23__LCDIF_DATA23  0x79
+			>;
+		};
+
+   };	
+};
+
+
+&lcdif {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lcdif_dat
+		     &pinctrl_lcdif_ctrl>;
+	display = <&display0>;
+	status = "okay";
+
+	display0: display1 {
+		bits-per-pixel = <16>;
+		bus-width = <24>;
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+			clock-frequency = <28000000>;
+			hactive = <800>;
+			vactive = <480>;
+			hfront-porch = <70>;
+			hback-porch = <50>;
+			hsync-len = <50>;
+			vback-porch = <0>;
+			vfront-porch = <0>;
+			vsync-len = <50>;
+
+			hsync-active = <1>;
+			vsync-active = <1>;
+			de-active = <1>;
+			pixelclk-active = <0>;
+			};
+		};
+	};
+};

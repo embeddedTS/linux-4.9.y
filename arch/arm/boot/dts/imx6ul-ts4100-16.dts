@@ -1,0 +1,20 @@
+/*
+ * Copyright 2011 Freescale Semiconductor, Inc.
+ * Copyright 2011 Linaro Ltd.
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+#include "imx6ul-ts4100.dtsi"
+#include "imx6ul-ts4100-ts8551.dtsi"
+
+/ {
+	model = "Technologic Systems i.MX6ul TS-4100 (TS-8551)";
+	compatible = "fsl,imx6ul-ts4100", "fsl,imx6ul";
+};

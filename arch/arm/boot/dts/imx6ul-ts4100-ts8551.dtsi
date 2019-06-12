@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2018 Technologic Systems
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include <dt-bindings/input/input.h>
+
+/* Requires more CS GPIO and updated pinctrl? */
+&ecspi3 {
+	fsl,spi-num-chipselects = <2>;
+	cs-gpios = <&gpio4 12 0>, <&gpio4 10 0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi3>;
+	status = "okay";
+
+        spifram: spi@1 {
+                compatible = "atmel,at25", "cypress,fm25l16b";
+                reg = <1>;
+                spi-max-frequency = <20000000>;
+                size = <0x800>;
+                address-width = <16>;
+                pagesize = <64>;
+        };
+
+};
+
+&can2 {
+	status = "disabled";
+};
+
+&i2c3 {
+	strtc: m41t00s@68 {
+		compatible = "m41t00";
+		reg = <0x68>;
+	};
+};
+
+&snvs_rtc {
+	status = "disabled";
+};
+
+&snvs_poweroff {
+	status = "disabled";
+};
+
+&uart4 {
+	fsl,uart-has-rtscts;
+	/* gpio 1_18 is initialized by the hog group in 4100.dtsi
+	 * It is the SPARE_1 pin, needs to be set up in FPGA to pass to TXEN
+	 * with the command 'tshwctl --out 0x31 --in 0x2'
+	 */
+	fsl,uart-tx-enable-gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+	linux,rs485-enabled-at-boot-time;
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ts4100_pinctrl_hog &pinctrl_cam_gpio &pinctrl_lcd_gpio>;
+};

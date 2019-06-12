@@ -424,6 +424,11 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ul-tx6ul-0010.dtb \
 	imx6ul-tx6ul-0011.dtb \
 	imx6ul-tx6ul-mainboard.dtb \
+	imx6ul-ts4100.dtb \
+	imx6ul-ts4100-2.dtb \
+	imx6ul-ts4100-8.dtb \
+	imx6ul-ts4100-2f.dtb \
+	imx6ul-ts4100-16.dtb \
 	imx6ul-ts7553v2.dtb
 dtb-$(CONFIG_SOC_IMX7D) += \
 	imx7d-cl-som-imx7.dtb \

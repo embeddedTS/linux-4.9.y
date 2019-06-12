@@ -1,0 +1,39 @@
+/*
+ * Copyright (C) 2019 Technologic Systems
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include <dt-bindings/input/input.h>
+
+&can2 {
+	status = "disabled";
+};
+
+&snvs_poweroff {
+	status = "disabled";
+};
+
+/* TODO: Due to the shared MDIO bus, its tricky to disable one eth MAC without
+ * taking both of them out. Need to come back to this in the future.
+&fec1 {
+	status = "disabled";
+};
+*/
+
+&uart4 {
+	fsl,uart-has-rtscts;
+	/* gpio 1_18 is initialized by the hog group in 4100.dtsi
+	 * It is the SPARE_1 pin, needs to be set up in FPGA to pass to TXEN
+	 * with the command 'tshwctl --out 0x31 --in 0x2'
+	 */
+	fsl,uart-tx-enable-gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+	linux,rs485-enabled-at-boot-time;
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ts4100_pinctrl_hog &pinctrl_cam_gpio &pinctrl_lcd_gpio>;
+};

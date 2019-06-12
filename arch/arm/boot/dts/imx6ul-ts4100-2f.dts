@@ -1,0 +1,33 @@
+ /*
+ * Copyright 2018 Technologic Systems
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+#include "imx6ul-ts4100.dtsi"
+
+/ {
+	model = "Technologic Systems i.MX6ul TS-4100 (TS-Custom)";
+	compatible = "fsl,imx6ul-ts4100", "fsl,imx6ul";
+};
+
+&i2c3 {
+	strtc: m41t00s@68 {
+		compatible = "m41t00";
+		reg = <0x68>;
+	};
+};
+
+&snvs_rtc {
+	status = "disabled";
+};
+
+&snvs_poweroff {
+	status = "disabled";
+};
