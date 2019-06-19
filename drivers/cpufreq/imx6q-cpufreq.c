@@ -12,6 +12,7 @@
 #include <linux/err.h>
 #include <linux/module.h>
 #include <linux/of.h>
+#include <linux/of_address.h>
 #include <linux/pm_opp.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
@@ -118,6 +119,10 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 			clk_set_parent(secondary_sel_clk, pll2_pfd2_396m_clk);
 		clk_set_parent(step_clk, secondary_sel_clk);
 		clk_set_parent(pll1_sw_clk, step_clk);
+		if (freq_hz > clk_get_rate(pll2_bus_clk)) {
+			clk_set_rate(pll1_sys_clk, new_freq * 1000);
+			clk_set_parent(pll1_sw_clk, pll1_sys_clk);
+		}
 	} else {
 		clk_set_parent(step_clk, pll2_pfd2_396m_clk);
 		clk_set_parent(pll1_sw_clk, step_clk);
@@ -180,6 +185,45 @@ static struct cpufreq_driver imx6q_cpufreq_driver = {
 	.name = "imx6q-cpufreq",
 	.attr = cpufreq_generic_attr,
 };
+
+#define OCOTP_CFG3			0x440
+#define OCOTP_CFG3_SPEED_SHIFT		16
+#define OCOTP_CFG3_6UL_SPEED_696MHZ	0x2
+
+static void imx6ul_opp_check_speed_grading(struct device *dev)
+{
+	struct device_node *np;
+	void __iomem *base;
+	u32 val;
+
+	np = of_find_compatible_node(NULL, NULL, "fsl,imx6ul-ocotp");
+	if (!np)
+		return;
+
+	base = of_iomap(np, 0);
+	if (!base) {
+		dev_err(dev, "failed to map ocotp\n");
+		goto put_node;
+	}
+
+	/*
+	 * Speed GRADING[1:0] defines the max speed of ARM:
+	 * 2b'00: Reserved;
+	 * 2b'01: 528000000Hz;
+	 * 2b'10: 696000000Hz;
+	 * 2b'11: Reserved;
+	 * We need to set the max speed of ARM according to fuse map.
+	 */
+	val = readl_relaxed(base + OCOTP_CFG3);
+	val >>= OCOTP_CFG3_SPEED_SHIFT;
+	val &= 0x3;
+	if (val != OCOTP_CFG3_6UL_SPEED_696MHZ)
+		if (dev_pm_opp_disable(dev, 696000000))
+			dev_warn(dev, "failed to disable 696MHz OPP\n");
+	iounmap(base);
+put_node:
+	of_node_put(np);
+}
 
 static int imx6q_cpufreq_probe(struct platform_device *pdev)
 {
@@ -246,6 +290,9 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 			dev_err(cpu_dev, "failed to init OPP table: %d\n", ret);
 			goto put_reg;
 		}
+
+		if (of_machine_is_compatible("fsl,imx6ul"))
+			imx6ul_opp_check_speed_grading(cpu_dev);
 
 		/* Because we have added the OPPs here, we must free them */
 		free_opp = true;
