@@ -506,7 +506,18 @@ config TS_WDT_MICRO
 	select WATCHDOG_CORE
 	help
 	  Hardware driver for the Technologic Systems silabs based 
-	  microcontroller watchdog
+	  microcontroller watchdog.
+
+	  Directly compatible with the TS-4100, TS-7400-V2, TS-7553-V2,
+	  TS-7670, TS-7680, and TS-7682.
+
+config TS7100_WATCHDOG
+	tristate "TS-7100 (and compatible) Microcontroller Watchdog"
+	depends on ARM
+	select WATCHDOG_CORE
+	help
+	  Hardware driver for Technologic Systems' TS-7100 and compatible
+	  microcontroller watchdog.
 
 config TS4800_WATCHDOG
 	tristate "TS-4800 Watchdog"
