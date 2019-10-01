@@ -44,7 +44,7 @@
 
 		en-emmc {
 			label = "en-emmc";
-			gpios = <&gpio6 16 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio7 0 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 	};
@@ -95,7 +95,7 @@
 			regulator-name = "en-lcdif";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
-			gpio = <&gpio6 33 GPIO_ACTIVE_HIGH>;
+			gpio = <&gpio8 1 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 			/* The mxsfb driver doesn't properly handle an
 			 * EPROBE_DEFER from trying to get the gpio for power
@@ -387,7 +387,7 @@
 				spi-max-frequency = <1000000>;
 				interrupt-parent = <&fpga_intc>;
 				interrupts = <16>;
-				pendown-gpio = <&gpio6 32 GPIO_ACTIVE_HIGH>;
+				pendown-gpio = <&gpio8 0 GPIO_ACTIVE_HIGH>;
 				vcc-supply = <&dummy_3v3>;
 				status = "okay";
 
@@ -417,11 +417,35 @@
 
 			gpio6: fpga_gpio6@10 {
 				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0 0x50>;
+				reg = <0 0x10 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
 				base = <160>;
-				ngpios = <48>;
+				ngpios = <16>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+			};
+
+			gpio7: fpga_gpio7@40 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0 0x40 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				base = <176>;
+				ngpios = <16>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+			};
+
+			gpio8: fpga_gpio8@50 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0 0x50 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				base = <192>;
+				ngpios = <16>;
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				status = "okay";
