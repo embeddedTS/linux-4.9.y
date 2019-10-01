@@ -19,58 +19,22 @@
 #include <linux/module.h>
 #include <linux/delay.h>
 
-#define TSWEIM_NR_DIO	 	32
+/* Most that this driver can currently support in a single bank is 16. This is
+ * due simply to how the FPGA used for these devices is structured. */
+#define TSWEIM_NR_DIO	 		16
 
-/* Register offsets from the 'reg' value in device-tree */
-#define BANK_0_OUTPUT_SET_REG 0x10
-#define BANK_0_OUTPUT_GET_REG 0x10
-#define BANK_0_OUTPUT_ENABLE_SET_REG 0x12
-#define BANK_0_OUTPUT_CLR_REG 0x14
-#define BANK_0_OUTPUT_ENABLE_CLR_REG 0x16
-
-#define BANK_1_OUTPUT_SET_REG 0x40
-#define BANK_1_OUTPUT_GET_REG 0x40
-#define BANK_1_OUTPUT_ENABLE_SET_REG 0x42
-#define BANK_1_OUTPUT_CLR_REG 0x44
-#define BANK_1_OUTPUT_ENABLE_CLR_REG 0x46
-
-#define BANK_2_OUTPUT_SET_REG 0x50
-#define BANK_2_OUTPUT_GET_REG 0x50
-#define BANK_2_OUTPUT_ENABLE_SET_REG 0x52
-#define BANK_2_OUTPUT_CLR_REG 0x54
-#define BANK_2_OUTPUT_ENABLE_CLR_REG 0x56
-
+/* Register offsets from the 'reg' value passed in device tree source */
+#define OUTPUT_SET_REG		0x00
+#define OUTPUT_GET_REG		0x00
+#define OUTPUT_EN_SET_REG	0x02
+#define OUTPUT_CLR_REG		0x04
+#define OUTPUT_EN_CLR_REG	0x06
 
 struct tsweim_gpio_priv {
 	void __iomem  *syscon;
 	struct gpio_chip gpio_chip;
 	spinlock_t lock;
-	unsigned int direction[4];   /* enough for all 118 DIOs, 1=in, 0=out */
-	unsigned int ovalue[4];
 };
-
-
-/*
-	DIO is controlled by eight 16-bit registers in the FPGA Syscon:
-
-	Bank 0:
-		Offset 0x10:  Data Set (write) or Pin State (read)
-		Offset 0x12:  Output Enable Set
-		Offset 0x14:  Data Clear
-		Offset 0x16:  Output Enable Clear
-
-	Bank 1:
-		Offset 0x40:  Data Set (write) or Pin State (read)
-		Offset 0x42:  Output Enable Set
-		Offset 0x44:  Data Clear
-		Offset 0x46:  Output Enable Clear
-
-	Bank 2:
-		Offset 0x50:  Data Set (write) or Pin State (read)
-		Offset 0x52:  Output Enable Set
-		Offset 0x54:  Data Clear
-		Offset 0x56:  Output Enable Clear
-*/
 
 static inline struct tsweim_gpio_priv *to_gpio_tsweim(struct gpio_chip *chip)
 {
@@ -96,7 +60,8 @@ static int tsweim_gpio_get_direction(struct gpio_chip *chip,
 		return -EINVAL;
 	}
 
-	return !!(priv->direction[offset / 32] & (1 << offset % 32));
+	/* XXX: HACK! */
+	return 0;
 
 }
 
@@ -122,18 +87,7 @@ static int tsweim_gpio_direction_input(struct gpio_chip *chip,
 
 	spin_lock_irqsave(&priv->lock, flags);
 
-	priv->direction[offset / 32] |= (1 << offset % 32);
-
-	if (offset < 16) {
-		writew((1 << offset),
-		  priv->syscon + BANK_0_OUTPUT_ENABLE_CLR_REG);
-	} else if (offset < 32) {
-		writew((1 << (offset-16)),
-		  priv->syscon + BANK_1_OUTPUT_ENABLE_CLR_REG);
-	} else {
-		writew((1 << (offset-32)),
-		  priv->syscon + BANK_2_OUTPUT_ENABLE_CLR_REG);
-	}
+	writew((1 << offset), priv->syscon + OUTPUT_EN_CLR_REG);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -164,42 +118,10 @@ static int tsweim_gpio_direction_output(struct gpio_chip *chip,
 
 	spin_lock_irqsave(&priv->lock, flags);
 
-	if (offset < 16) {
-		writew((1 << offset),
-		  priv->syscon + BANK_0_OUTPUT_ENABLE_SET_REG);
+	writew((1 << offset), priv->syscon + OUTPUT_EN_SET_REG);
+	if (value) writew((1 << offset), priv->syscon + OUTPUT_SET_REG);
+	else writew((1 << offset), priv->syscon + OUTPUT_CLR_REG);
 
-		if (value) {
-			writew((1 << offset),
-			  priv->syscon + BANK_0_OUTPUT_SET_REG);
-		} else {
-			writew((1 << offset),
-			  priv->syscon + BANK_0_OUTPUT_CLR_REG);
-		}
-	} else if (offset < 32) {
-		writew((1 << (offset-16)),
-		  priv->syscon + BANK_1_OUTPUT_ENABLE_SET_REG);
-
-		if (value) {
-			writew((1 << (offset-16)),
-			  priv->syscon + BANK_1_OUTPUT_SET_REG);
-		} else {
-			writew((1 << (offset-16)),
-			  priv->syscon + BANK_1_OUTPUT_CLR_REG);
-		}
-	} else {
-		writew((1 << (offset-32)),
-		  priv->syscon + BANK_2_OUTPUT_ENABLE_SET_REG);
-
-		if (value) {
-			writew((1 << (offset-32)),
-			  priv->syscon + BANK_2_OUTPUT_SET_REG);
-		} else {
-			writew((1 << (offset-32)),
-			  priv->syscon + BANK_2_OUTPUT_CLR_REG);
-		}
-	}
-
-	priv->direction[offset / 32] &= ~(1 << offset % 32);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return ret;
@@ -224,16 +146,8 @@ static int tsweim_gpio_get(struct gpio_chip *chip, unsigned int offset)
 		  return -1;
 	}
 
-	if (offset < 16) {
-		reg = readw(priv->syscon + BANK_0_OUTPUT_GET_REG);
-		return !!(reg & (1 << offset));
-	} else if (offset < 32)  {
-		reg = readw(priv->syscon + BANK_1_OUTPUT_GET_REG);
-		return !!(reg & (1 << (offset-16)));
-	} else {
-		reg = readw(priv->syscon + BANK_2_OUTPUT_GET_REG);
-		return !!(reg & (1 << (offset-32)));
-	}
+	reg = readw(priv->syscon + OUTPUT_GET_REG);
+	return !!(reg & (1 << offset));
 
 }
 
@@ -256,39 +170,10 @@ static void tsweim_gpio_set(struct gpio_chip *chip, unsigned int offset,
 		return;
 	}
 
-	if ((priv->direction[offset / 32] & (1 << offset % 32))) {
-		printk("DIO #%d is not an output\n",
-		  priv->gpio_chip.base + offset);
-		return;
-	}
-
 	spin_lock_irqsave(&priv->lock, flags);
 
-	if (offset < 16) {
-		if (value) {
-			writew((1 << offset),
-			  priv->syscon + BANK_0_OUTPUT_SET_REG);
-		} else {
-			writew((1 << offset),
-			  priv->syscon + BANK_0_OUTPUT_CLR_REG);
-		}
-	} else if (offset < 32) {
-		if (value) {
-			writew((1 << (offset-16)),
-			  priv->syscon + BANK_1_OUTPUT_SET_REG);
-		} else {
-			writew((1 << (offset-16)),
-			  priv->syscon + BANK_1_OUTPUT_CLR_REG);
-		}
-	} else {
-		if (value) {
-			writew((1 << (offset-32)),
-			  priv->syscon + BANK_2_OUTPUT_SET_REG);
-		} else {
-			writew((1 << (offset-32)),
-			  priv->syscon + BANK_2_OUTPUT_CLR_REG);
-		}
-	}
+	if (value) writew((1 << offset), priv->syscon + OUTPUT_SET_REG);
+	else writew((1 << offset), priv->syscon + OUTPUT_CLR_REG);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -364,14 +249,6 @@ static int tsweim_gpio_probe(struct platform_device *pdev)
 
 	pr_info("FPGA syscon mapped to 0x%08X, %d bytes\n",
 	  (unsigned int)priv->syscon, resource_size(res));
-
-	memset(priv->direction, 0xFF, sizeof(priv->direction));
-	memset(priv->ovalue, 0, sizeof(priv->ovalue));
-	/* Set all the DIO to inputs */
-
-	writew(0xffff, priv->syscon + BANK_0_OUTPUT_ENABLE_CLR_REG);
-	writew(0xffff, priv->syscon + BANK_1_OUTPUT_ENABLE_CLR_REG);
-	writew(0xffff, priv->syscon + BANK_2_OUTPUT_ENABLE_CLR_REG);
 
 	spin_lock_init(&priv->lock);
 	priv->gpio_chip = template_chip;
