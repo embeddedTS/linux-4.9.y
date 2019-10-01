@@ -12,13 +12,13 @@
 
 		io-green-led {
 			label = "io-green-led";
-			gpios = <&gpio6 25 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio7 9 GPIO_ACTIVE_LOW>;
 			default-state = "off";
 		};
 
 		io-red-led {
 			label = "io-red-led";
-			gpios = <&gpio6 24 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio7 8 GPIO_ACTIVE_LOW>;
 			default-state = "off";
 		};
 
@@ -30,12 +30,12 @@
 
 		/* The actual switch is present on the TS-7100-Z baseboard, so
 		 * we specifically implement control for it here. It is
-		 * dependent on the FPGA GPIO (gpio6) which is set up in the
+		 * dependent on the FPGA GPIO which is set up in the
 		 * 7100.dtsi. No iomux needs to be set up for it.
 		 */
 		en-usb-5v {
 			label = "en-usb-5v";
-			gpios = <&gpio6 21 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio7 5 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
 		};
 	};
@@ -53,7 +53,7 @@
 		reg = <0>;
 		spi-max-frequency = <48000000>;
 		/* These are in FPGA! */
-		reset-gpios = <&gpio6 23 GPIO_ACTIVE_HIGH>; /* low? */
+		reset-gpios = <&gpio7 7 GPIO_ACTIVE_HIGH>; /* low? */
 		chip_en-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
 		irq-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
 		status = "okay";
