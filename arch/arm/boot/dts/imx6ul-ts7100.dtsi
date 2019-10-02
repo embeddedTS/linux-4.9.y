@@ -411,8 +411,8 @@
 			compatible = "simple-bus";
 			#address-cells = <0x2>;
 			#size-cells = <0x1>;
-			reg = <0x4000 0x50>;
-			ranges = <0 0 0x4000 0x50>;
+			reg = <0x4000 0x58>;
+			ranges = <0 0 0x4000 0x58>;
 			status = "okay";
 
 			gpio6: fpga_gpio6@10 {
@@ -456,7 +456,7 @@
 
 				interrupt-controller;
 				#interrupt-cells = <1>;
-				reg = <0 0 0x50>;
+				reg = <0 0x00 0x50>;
 
 				interrupt-parent = <&gpio5>;
 				interrupts = <1 IRQ_TYPE_EDGE_RISING>;
