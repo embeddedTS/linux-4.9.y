@@ -36,7 +36,7 @@
 
 #define TSWEIM_IRQ_STATUS		0x24
 #define TSWEIM_IRQ_MASK			0x48
-#define TSWEIM_NUM_FPGA_IRQ	17
+#define TSWEIM_NUM_FPGA_IRQ		17
 
 static struct tsweim_intc_priv {
 	void __iomem  *syscon;
@@ -57,22 +57,14 @@ MODULE_DEVICE_TABLE(of, tsweim_intc_of_match_table);
 
 static void ts7120_intc_mask(struct irq_data *d)
 {
-	unsigned int mask;
-	if (priv.syscon) {
-		mask = readl(priv.syscon + TSWEIM_IRQ_MASK) & ~BIT(d->hwirq) ;
-		priv.mask = mask;
-		writel(mask, priv.syscon + TSWEIM_IRQ_MASK);
-	}
+	priv.mask = readl(priv.syscon + TSWEIM_IRQ_MASK) & ~BIT(d->hwirq) ;
+	writel(priv.mask, priv.syscon + TSWEIM_IRQ_MASK);
 }
 
 static void ts7120_intc_unmask(struct irq_data *d)
 {
-	unsigned int mask;
-	if (priv.syscon) {
-		mask = readl(priv.syscon + TSWEIM_IRQ_MASK) | BIT(d->hwirq) ;
-		priv.mask = mask;
-		writel(mask, priv.syscon + TSWEIM_IRQ_MASK);
-	}
+	priv.mask = readl(priv.syscon + TSWEIM_IRQ_MASK) | BIT(d->hwirq) ;
+	writel(priv.mask, priv.syscon + TSWEIM_IRQ_MASK);
 }
 
 static void ts7120_irq_handler(struct irq_desc *desc)
@@ -83,20 +75,20 @@ static void ts7120_irq_handler(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	if (priv.syscon) {
+	/* XXX: This might be easier to implement with a call to
+	 * for_each_set_bit() rather than this style of loop. */
 
-		while ((status =
-		  (priv.mask & readl(priv.syscon + TSWEIM_IRQ_STATUS)))) {
-			irq = 0;
-			do {
-				if (status & 1) {
-					generic_handle_irq(irq_linear_revmap(
-					  priv.irqdomain, irq));
-				}
-				status >>= 1;
-				irq++;
-			} while (status);
-		}
+	while ((status =
+	  (priv.mask & readl(priv.syscon + TSWEIM_IRQ_STATUS)))) {
+		irq = 0;
+		do {
+			if (status & 1) {
+				generic_handle_irq(irq_linear_revmap(
+				  priv.irqdomain, irq));
+			}
+			status >>= 1;
+			irq++;
+		} while (status);
 	}
 
 	chained_irq_exit(chip, desc);
@@ -169,9 +161,6 @@ static int tsweim_intc_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-	priv.mask = 0;
-	writel(0, priv.syscon + TSWEIM_IRQ_MASK);
-
 	irq_set_handler_data(priv.irq, &priv);
 	irq_set_chained_handler(priv.irq, ts7120_irq_handler);
 
@@ -201,7 +190,7 @@ static int tsweim_intc_remove(struct platform_device *pdev)
 
 static struct platform_driver tsweim_intc_driver = {
 	.driver = {
-		.name = "tsweim-intc",
+		.name = "ts7120-intc",
 		.of_match_table = of_match_ptr(tsweim_intc_of_match_table),
 	},
 	.probe = tsweim_intc_probe,
