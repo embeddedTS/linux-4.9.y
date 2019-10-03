@@ -2,7 +2,6 @@ menu "TS-FPGA devices"
 
 config TSWEIM_FPGA_INTC
 	tristate "TS-71XX WEIM FPGA IRQ Support"
-	depends on m
 	default n
 	help
 	  Select this option if you have a Technologic Systems TS-71XX SBC.
