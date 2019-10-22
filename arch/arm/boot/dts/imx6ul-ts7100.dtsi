@@ -175,10 +175,17 @@
 		#size-cells = <0>;
 
 		ethphy0: ethernet-phy@0 {
-			clocks = <&clks IMX6UL_CLK_ENET2_REF>;
+			clocks = <&clks IMX6UL_CLK_ENET_REF>;
 			clock-names = "rmii-ref";
 			compatible = "ethernet-phy-ieee802.3-c22";
 			reg = <2>;
+		};
+
+		ethphy1: ethernet-phy@1 {
+			clocks = <&clks IMX6UL_CLK_ENET_REF>;
+			clock-names = "rmii-ref";
+			compatible = "ethernet-phy-ieee802.3-c22";
+			reg = <1>;
 		};
 	};
 };
@@ -190,18 +197,6 @@
 	phy-handle = <&ethphy1>;
 	phy-supply = <&dummy_3v3>;
 	status = "okay";
-
-	mdio {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		ethphy1: ethernet-phy@1 {
-			clocks = <&clks IMX6UL_CLK_ENET2_REF>;
-			clock-names = "rmii-ref";
-			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <1>;
-		};
-	};
 };
 
 &adc1 {
@@ -617,13 +612,6 @@
 
 		pinctrl_enet2: enet2grp {
 			fsl,pins = <
-				/* For some reason the 4100 has this set up with
-				 * enet2 MDIO/MDC?
-				 */
-				/*
-				MX6UL_PAD_GPIO1_IO07__ENET2_MDC	0x1b0b0
-				MX6UL_PAD_GPIO1_IO06__ENET2_MDIO	0x1b0b0
-				*/
 				MX6UL_PAD_ENET2_RX_EN__ENET2_RX_EN	0x1b0b0
 				MX6UL_PAD_ENET2_RX_ER__ENET2_RX_ER	0x1b0b0
 				MX6UL_PAD_ENET2_RX_DATA0__ENET2_RDATA00	0x1b0b0
