@@ -581,7 +581,7 @@
 			clock-names = "spi-oc-clk";
 			opencores-spi,idx = <0>;
 			opencores-spi,num-chipselects = <2>;
-			status = "disabled";
+			status = "okay";
 
 			spifram: spi@0 {
 				compatible = "atmel,at25", "cypress,fm25l16b";
@@ -596,14 +596,59 @@
 
 		syscon: syscon@4000 {
 			compatible = "simple-bus";
-			#address-cells = <0x2>;
+			#address-cells = <0x1>;
 			#size-cells = <0x1>;
 			reg = <0x4000 0x58>;
-			ranges = <0 0 0x4000 0x58>;
+			ranges = <0 0x4000 0x58>;
 			status = "okay";
+
+			fpga_intc: fpga_intc@0 {
+				compatible = "technologic,ts71xxweim-intc";
+				reg = <0x0 0x50>;
+
+				interrupt-controller;
+				#interrupt-cells = <1>;
+
+				interrupt-parent = <&gpio5>;
+				interrupts = <1 IRQ_TYPE_EDGE_RISING>;
+				status = "okay";
+			};
+
+			pc104bus: fpgaisa@50 {
+				compatible = "technologic,pc104-bus";
+				reg = <0x50 0x4>;
+
+				ranges = <0 0 0x1000>;
+				reset-gpio = <&gpio3 7 0>;
+
+				#address-cells = <0x1>;
+				#size-cells = <0x1>;
+
+				status = "okay";
+
+				/* For TS-RELAY8, remove all jumpers */
+				tsrelay8@140 {
+					compatible = "technologic,tsrelay8";
+					reg = <0x140 4>;
+
+					status = "disabled";
+				};
+
+				/* For TS-SER1 set IRQ6+COM3 jumpers on: */
+				ts16550@3e8 {
+					compatible = "technologic,ts16550";
+
+					reg = <0x3e8 8>;
+					interrupt-parent = <&fpga_intc>;
+					interrupts = <15>;
+
+					status = "okay";
+				};
+			};
+
 			gpio6: fpga_gpio6@10 {
 				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0x10 0x08>;
+				reg = <0x10 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
 				base = <160>;
@@ -615,7 +660,7 @@
 
 			gpio7: fpga_gpio7@40 {
 				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0x40 0x08>;
+				reg = <0x40 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
 				base = <176>;
@@ -627,7 +672,7 @@
 
 			gpio8: fpga_gpio8@50 {
 				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0x50 0x08>;
+				reg = <0x50 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
 				base = <192>;
@@ -635,18 +680,6 @@
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				status = "disabled";
-			};
-
-			fpga_intc: fpga_intc@0 {
-				compatible = "technologic,ts71xxweim-intc";
-
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				reg = <0 0x00 0x50>;
-
-				interrupt-parent = <&gpio5>;
-				interrupts = <1 IRQ_TYPE_EDGE_RISING>;
-				status = "okay";
 			};
 		};
 	 };
