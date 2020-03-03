@@ -49,7 +49,17 @@
 
 	aliases {
 		ethernet0 = &fec1;
-		ethernet2 = &fec2;
+		ethernet1 = &fec2;
+		serial8 = &fpga_uart0;
+		serial9 = &fpga_uart1;
+		serial10 = &fpga_uart2;
+		serial11 = &fpga_uart3;
+		serial12 = &fpga_uart4;
+		serial13 = &fpga_uart5;
+		serial14 = &fpga_uart6;
+		serial15 = &fpga_uart7;
+		serial16 = &fpga_uart8;
+		pc104bus = &pc104bus;
 	};
 
 	chosen {
@@ -560,13 +570,126 @@
 		fpga_uart0: serial@0 {
 			compatible = "ns16550a";
 			device_type = "serial";
+			reg = <0x0 16>;
+
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			reg = <0 16>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <0>;
+			status = "okay";
+		};
+
+		fpga_uart1: serial@10 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x10 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <1>;
+			status = "okay";
+		};
+
+		fpga_uart2: serial@20 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x20 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <2>;
+			status = "okay";
+		};
+
+		fpga_uart3: serial@30 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x30 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <3>;
+			status = "okay";
+		};
+
+		fpga_uart4: serial@40 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x40 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <4>;
+			status = "okay";
+		};
+
+		fpga_uart5: serial@50 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x50 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <5>;
+			status = "okay";
+		};
+
+		fpga_uart6: serial@60 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x60 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <6>;
+			status = "okay";
+		};
+
+		fpga_uart7: serial@70 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x70 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <7>;
+			status = "okay";
+		};
+
+		fpga_uart8: serial@80 {
+			compatible = "ns16550a";
+			device_type = "serial";
+			reg = <0x80 16>;
+
+			current-speed = <115200>;
+			reg-shift = <1>;
+			reg-io-width = <1>;
+			clock-frequency = <1843200>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <8>;
 			status = "okay";
 		};
 
@@ -580,17 +703,13 @@
 			clocks = <&fpga_clk_weim_bclk>;
 			clock-names = "spi-oc-clk";
 			opencores-spi,idx = <0>;
-			opencores-spi,num-chipselects = <2>;
+			opencores-spi,num-chipselects = <1>;
 			status = "okay";
 
-			spifram: spi@0 {
-				compatible = "atmel,at25", "cypress,fm25l16b";
+			offboardspi0: offboardspi@0 {
+				compatible = "spidev";
 				reg = <0>;
-				spi-max-frequency = <20000000>;
-				size = <0x800>;
-				address-width = <16>;
-				pagesize = <64>;
-				status = "okay";
+				spi-max-frequency = <1000000>;
 			};
 		};
 
@@ -656,6 +775,24 @@
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				status = "okay";
+
+				gpio-line-names =
+					"PHY_RESET#",
+					"DIO_PIN1",
+					"DIO_PIN3",
+					"DIO_PIN5",
+					"DIO_PIN7",
+					"DIO_PIN8",
+					"DIO_PIN9",
+					"DIO_PIN11",
+					"DIO_PIN13",
+					"DIO_PIN15",
+					"DIO_SPI_MISO",
+					"DIO_SPI_CS#",
+					"SILAB_CLK",
+					"SILAB_DAT",
+					"",
+					"";
 			};
 
 			gpio7: fpga_gpio7@40 {
@@ -668,18 +805,24 @@
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				status = "okay";
-			};
 
-			gpio8: fpga_gpio8@50 {
-				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0x50 0x08>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				base = <192>;
-				ngpios = <16>;
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				status = "disabled";
+				gpio-line-names =
+					"MIKRO_RESET#",
+					"ISA_BALE",
+					"ISA_TC",
+					"ISA_ENDX",
+					"EN_NIMBEL_3V3",
+					"ISA_IORDY",
+					"ISA_REFRESH",
+					"ISA_DRQ1",
+					"ISA_DACK1",
+					"ISA_DRQ2",
+					"ISA_DACK2",
+					"EN_NIMBEL_4V",
+					"ISA_DRQ3",
+					"ISA_DACK3",
+					"",
+					"";
 			};
 		};
 	 };
