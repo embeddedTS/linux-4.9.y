@@ -11,7 +11,7 @@
 #define TSISA_IO	(1 << 30) /* io=1, mem=0 */
 #define TSISA_8BIT	(1 << 29) /* 8bit=1, 16-bit=0 */
 #define TSISA_RDEN	(1 << 28) /* read=1, write=0 */
-#define TSISA_TS	(1 << 30) /* 1=TS PC104 pinout, 0=standard pinout */
+#define TSISA_TS	(1 << 27) /* 1=TS PC104 pinout, 0=standard pinout */
 
 struct tspc104_bus;
 
@@ -66,6 +66,31 @@ static inline int tspc104_mem_write16(struct tspc104_bus *bus, unsigned int reg,
 			       unsigned int *val)
 {
 	return tspc104_reg_write(bus, reg, val, 0);
+}
+
+/* TS special pinout modes */
+static inline int tspc104_mem_write16_altpinout(struct tspc104_bus *bus, unsigned int reg,
+			       unsigned int *val)
+{
+	return tspc104_reg_write(bus, reg, val, TSISA_TS);
+}
+
+static inline int tspc104_mem_read16_altpinout(struct tspc104_bus *bus, unsigned int reg,
+			       unsigned int *val)
+{
+	return tspc104_reg_read(bus, reg, val, TSISA_TS);
+}
+
+static inline int tspc104_io_write16_altpinout(struct tspc104_bus *bus, unsigned int reg,
+			       unsigned int *val)
+{
+	return tspc104_reg_write(bus, reg, val, TSISA_IO | TSISA_TS);
+}
+
+static inline int tspc104_io_read16_altpinout(struct tspc104_bus *bus, unsigned int reg,
+			       unsigned int *val)
+{
+	return tspc104_reg_read(bus, reg, val, TSISA_IO | TSISA_TS);
 }
 
 #endif /* _TS_PC104_H */
