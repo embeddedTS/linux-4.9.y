@@ -15,6 +15,7 @@
 #include <linux/kernel.h>
 #include <linux/delay.h>
 #include <linux/init.h>
+#include <linux/sysfs.h>
 #include <linux/io.h>
 #include <linux/platform_device.h>
 #include <linux/of.h>
@@ -37,6 +38,8 @@
  *   bit 26-0: address/data
  * 
  */
+
+#define PC104_ADDR_SPACE	((1<<19) - 1)
 
 struct tspc104_bus {
 	struct gpio_desc *gpio_reset;
@@ -96,11 +99,6 @@ EXPORT_SYMBOL_GPL(tspc104_reg_read);
 static int ts_pc104bus_init_pdata(struct platform_device *pdev,
 				  struct tspc104_bus *bus)
 {
-	if(of_property_read_bool(pdev->dev.of_node, "ts-mode"))
-		bus->use_ts_mode = 1;
-	else
-		bus->use_ts_mode = 0;
-
 	bus->gpio_reset = devm_gpiod_get(&pdev->dev, "reset",
 					 GPIOD_OUT_HIGH);
 	if (IS_ERR(bus->gpio_reset)) {
@@ -110,6 +108,298 @@ static int ts_pc104bus_init_pdata(struct platform_device *pdev,
 
 	return 0;
 }
+
+ssize_t isa_io8_read(struct file *filp, struct kobject *kobj,
+		     struct bin_attribute *bin_attr,
+		     char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i++){
+		unsigned int val;
+		tspc104_io_read8(bus, off + i, &val);
+		buf[i] = (char)val;
+	}
+
+	return i;
+}
+
+ssize_t isa_io8_write(struct file *filp, struct kobject *kobj,
+		      struct bin_attribute *bin_attr,
+		      char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i++){
+		unsigned int val = (unsigned int)buf[i];
+		tspc104_io_write8(bus, off + i, &val);
+	}
+
+	return i;
+}
+
+ssize_t isa_mem8_read(struct file *filp, struct kobject *kobj,
+		     struct bin_attribute *bin_attr,
+		     char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i++){
+		unsigned int val;
+		tspc104_mem_read8(bus, off + i, &val);
+		buf[i] = (char)val;
+	}
+
+	return i;
+}
+
+ssize_t isa_mem8_write(struct file *filp, struct kobject *kobj,
+		      struct bin_attribute *bin_attr,
+		      char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i++){
+		unsigned int val = (unsigned int)buf[i];
+		tspc104_mem_write8(bus, off + i, &val);
+	}
+
+	return i;
+}
+
+ssize_t isa_io16_read(struct file *filp, struct kobject *kobj,
+		     struct bin_attribute *bin_attr,
+		     char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val;
+		tspc104_io_read16(bus, off + i, &val);
+		buf[i] = (char)val;
+		if(i <= count)
+			buf[i+1] = (char)(val >> 8);
+	}
+
+	return i;
+}
+
+ssize_t isa_io16_write(struct file *filp, struct kobject *kobj,
+		      struct bin_attribute *bin_attr,
+		      char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	BUG_ON(count % 2 != 0);
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val = (unsigned int)(buf[i]);;
+		val |= (unsigned int)(buf[i+1] << 8);
+		tspc104_io_write16(bus, off + i, &val);
+	}
+
+	return i;
+}
+
+ssize_t isa_mem16_read(struct file *filp, struct kobject *kobj,
+		     struct bin_attribute *bin_attr,
+		     char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val;
+		tspc104_mem_read16(bus, off + i, &val);
+		buf[i] = (char)val;
+		if(i <= count)
+			buf[i+1] = (char)(val >> 8);
+	}
+
+	return i;
+}
+
+ssize_t isa_mem16_write(struct file *filp, struct kobject *kobj,
+		      struct bin_attribute *bin_attr,
+		      char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	BUG_ON(count % 2 != 0);
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val = (unsigned int)(buf[i]);;
+		val |= (unsigned int)(buf[i+1] << 8);
+		tspc104_mem_write16(bus, off + i, &val);
+	}
+
+	return i;
+}
+
+ssize_t isa_io16alt_read(struct file *filp, struct kobject *kobj,
+		     struct bin_attribute *bin_attr,
+		     char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val;
+		tspc104_io_read16_altpinout(bus, off + i, &val);
+		buf[i] = (char)val;
+		if(i <= count)
+			buf[i+1] = (char)(val >> 8);
+	}
+
+	return i;
+}
+
+ssize_t isa_io16alt_write(struct file *filp, struct kobject *kobj,
+		      struct bin_attribute *bin_attr,
+		      char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	BUG_ON(count % 2 != 0);
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val = (unsigned int)(buf[i]);;
+		val |= (unsigned int)(buf[i+1] << 8);
+		tspc104_io_write16_altpinout(bus, off + i, &val);
+	}
+
+	return i;
+}
+
+ssize_t isa_mem16alt_read(struct file *filp, struct kobject *kobj,
+		     struct bin_attribute *bin_attr,
+		     char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val;
+		tspc104_mem_read16_altpinout(bus, off + i, &val);
+		buf[i] = (char)val;
+		if(i <= count)
+			buf[i+1] = (char)(val >> 8);
+	}
+
+	return i;
+}
+
+ssize_t isa_mem16alt_write(struct file *filp, struct kobject *kobj,
+		      struct bin_attribute *bin_attr,
+		      char *buf, loff_t off, size_t count)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct tspc104_bus *bus = dev_get_drvdata(dev);
+	int i;
+
+	BUG_ON(count % 2 != 0);
+
+	for (i = 0; i < count; i += 2){
+		unsigned int val = (unsigned int)(buf[i]);;
+		val |= (unsigned int)(buf[i+1] << 8);
+		tspc104_mem_write16_altpinout(bus, off + i, &val);
+	}
+
+	return i;
+}
+
+struct bin_attribute isa_io8_attr = {
+	.attr = {
+		.name = "io8",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = PC104_ADDR_SPACE,
+	.read = isa_io8_read,
+	.write = isa_io8_write,
+};
+
+struct bin_attribute isa_mem8_attr = {
+	.attr = {
+		.name = "mem8",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = PC104_ADDR_SPACE,
+	.read = isa_mem8_read,
+	.write = isa_mem8_write,
+};
+
+struct bin_attribute isa_io16_attr = {
+	.attr = {
+		.name = "io16",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = PC104_ADDR_SPACE,
+	.read = isa_io16_read,
+	.write = isa_io16_write,
+};
+
+struct bin_attribute isa_mem16_attr = {
+	.attr = {
+		.name = "mem16",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = PC104_ADDR_SPACE,
+	.read = isa_mem16_read,
+	.write = isa_mem16_write,
+};
+
+struct bin_attribute isa_io16alt_attr = {
+	.attr = {
+		.name = "ioalt16",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = PC104_ADDR_SPACE,
+	.read = isa_io16alt_read,
+	.write = isa_io16alt_write,
+};
+
+struct bin_attribute isa_mem16alt_attr = {
+	.attr = {
+		.name = "memalt16",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = PC104_ADDR_SPACE,
+	.read = isa_mem16alt_read,
+	.write = isa_mem16alt_write,
+};
+
+static struct bin_attribute *tsisa_sysfs_bin_attrs[] = {
+	&isa_io8_attr,
+	&isa_mem8_attr,
+	&isa_io16_attr,
+	&isa_mem16_attr,
+	&isa_io16alt_attr,
+	&isa_mem16alt_attr,
+	NULL,
+};
+
+static const struct attribute_group tsisa_sysfs_group = {
+	.bin_attrs = tsisa_sysfs_bin_attrs,
+};
 
 static int technologic_isa_probe(struct platform_device *pdev)
 {
@@ -144,12 +434,13 @@ static int technologic_isa_probe(struct platform_device *pdev)
 	msleep(10);
 	gpiod_set_value(bus->gpio_reset, 0);
 
-	/*
-	 * let the child nodes retrieve this instance of the ts-nbus.
-	 */
 	dev_set_drvdata(dev, bus);
 	ret = of_platform_populate(dev->of_node, NULL, NULL, dev);
 	if (ret < 0)
+		return ret;
+
+	ret = sysfs_create_group(&dev->kobj, &tsisa_sysfs_group);
+	if(ret < 0)
 		return ret;
 
 	dev_info(dev, "ready\n");
