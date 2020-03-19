@@ -744,25 +744,6 @@
 				#size-cells = <0x1>;
 
 				status = "okay";
-
-				/* For TS-RELAY8, remove all jumpers */
-				tsrelay8@140 {
-					compatible = "technologic,tsrelay8";
-					reg = <0x140 4>;
-
-					status = "disabled";
-				};
-
-				/* For TS-SER1 set IRQ6+COM3 jumpers on: */
-				ts16550@3e8 {
-					compatible = "technologic,ts16550";
-
-					reg = <0x3e8 8>;
-					interrupt-parent = <&fpga_intc>;
-					interrupts = <15>;
-
-					status = "okay";
-				};
 			};
 
 			gpio6: fpga_gpio6@10 {
