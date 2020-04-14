@@ -16,6 +16,12 @@ config PC104_TSRELAY8
 	help
 	  Enables support for the TS-RELAY8 with 8 relays
 
+config PC104_TS16550
+	tristate "TS-16550 Driver"
+	help
+	  Enables support for a generic ISA 16550.  Used with the 
+	  TS-SER4, TS-SER2, TS-IS0485, TS-MULTI104, and others.
+
 endif # PC104
 
 endmenu
