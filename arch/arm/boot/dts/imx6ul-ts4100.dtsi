@@ -149,6 +149,17 @@
 			enable-gpio = <&gpio5 9 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
+
+	       vref_vdd_adc_3v3: adc@0 {
+			      compatible = "regulator-fixed"
+			      regulator-name = "vref_vdd_adc";
+			      regulator-min-microvolt = <3300000>;
+			      regulator-max-microvolt = <3300000>;
+			      regulator-boot-on;
+			      regulator-always-on;
+	        };
+				  
+
 	};
 };
 
@@ -223,6 +234,13 @@
 			reg = <1>;
 		};
 	};
+};
+
+&adc  {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_adc>;
+	vref-vdd-supply = <&vref_vdd_adc_3v3>;
+	status = "okay";
 };
 
 &can1 {
@@ -512,6 +530,17 @@
 				MX6UL_PAD_SNVS_TAMPER2__GPIO5_IO02   0x1b020
 			>;
 		};
+
+		pinctrl_adc: adcgrp{
+			fsl,pins = <
+			         MX6UL_PAD_GPIO1_IO00__GPIO1_IO00    0x1a020
+                                 MX6UL_PAD_GPIO1_IO01__GPIO1_IO01    0x1a020
+                                 MX6UL_PAD_GPIO1_IO04__GPIO1_IO04    0x1a020
+                                 MX6UL_PAD_GPIO1_IO05__GPIO1_IO05    0x1a020
+                                 MX6UL_PAD_GPIO1_IO08__GPIO1_IO08    0x1a020
+                                 MX6UL_PAD_GPIO1_IO09__GPIO1_IO09    0x1a020
+			>;
+	        };
 
 		pinctrl_usb_otg1_id: usbotg1idgrp {
 			fsl,pins = <
