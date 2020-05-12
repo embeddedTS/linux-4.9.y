@@ -475,8 +475,7 @@
 				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x1b020
 				/* SPARE_3 */
 				MX6UL_PAD_NAND_DQS__GPIO4_IO16		0x1b020
-				/* GPIO 1 */
-				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0x1b020
+				
 			>;
 		};
 
@@ -533,11 +532,8 @@
 
 		pinctrl_adc1: adc1grp{
 			fsl,pins = <
-			         MX6UL_PAD_GPIO1_IO00__GPIO1_IO00    0x1a020
+			         
                                  MX6UL_PAD_GPIO1_IO01__GPIO1_IO01    0x1a020
-                                 MX6UL_PAD_GPIO1_IO04__GPIO1_IO04    0x1a020
-                                 MX6UL_PAD_GPIO1_IO05__GPIO1_IO05    0x1a020
-                                 MX6UL_PAD_GPIO1_IO08__GPIO1_IO08    0x1a020
                                  MX6UL_PAD_GPIO1_IO09__GPIO1_IO09    0x1a020
 			>;
 	        };
@@ -571,12 +567,6 @@
 		pinctrl_pwm1: ts4100pwm1 {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO08__PWM1_OUT  0x13020
-			>;
-		};
-
-		pinctrl_pwm2: ts4100pwm2 {
-			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO09__PWM2_OUT  0x13020
 			>;
 		};
 
