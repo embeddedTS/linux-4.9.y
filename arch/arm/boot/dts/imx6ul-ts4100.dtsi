@@ -158,7 +158,6 @@
 			      regulator-boot-on;
 			      regulator-always-on;
 	        };
-				  
 
 	};
 };
@@ -272,7 +271,7 @@
 &pwm2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm2>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pwm5 {
@@ -475,7 +474,6 @@
 				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x1b020
 				/* SPARE_3 */
 				MX6UL_PAD_NAND_DQS__GPIO4_IO16		0x1b020
-				
 			>;
 		};
 
@@ -532,7 +530,6 @@
 
 		pinctrl_adc1: adc1grp{
 			fsl,pins = <
-			         
                                  MX6UL_PAD_GPIO1_IO01__GPIO1_IO01    0x1a020
                                  MX6UL_PAD_GPIO1_IO09__GPIO1_IO09    0x1a020
 			>;
@@ -567,6 +564,14 @@
 		pinctrl_pwm1: ts4100pwm1 {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO08__PWM1_OUT  0x13020
+			>;
+		};
+                /*  adc1 is currently using IO09,to use pwm2 remove IO09 from the ADC
+		 *  definition and set pwm2 peripheral to "okay
+		 */
+		pinctrl_pwm2: ts4100pwm2 {
+			fsl,pins = <
+				MX6UL_PAD_GPIO1_IO09__PWM2_OUT  0x13020
 			>;
 		};
 
