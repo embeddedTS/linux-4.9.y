@@ -146,18 +146,18 @@
 
 	magnet: magnetometer@1e {
 		compatible = "st,lis2mdl";
-		ret = <0x1e>;
+		reg = <0x1e>;
 		interrupt-parent = <&gpio1>;
 		interrupts = <14 IRQ_TYPE_EDGE_RISING>;
-		status = "disabled";
+		status = "okay";
 	};
 
-	gyro: ism1330@1f {
+	gyro: ism1330@6a {
 		compatible = "st,ism330dlc";
-		ret = <0x1f>;
+		reg = <0x6a>;
 		interrupt-parent = <&gpio1>;
 		interrupts = <14 IRQ_TYPE_EDGE_RISING>;
-		status = "disabled";
+		status = "okay";
 	};
 
 	rtc: m41t00s@68 {
