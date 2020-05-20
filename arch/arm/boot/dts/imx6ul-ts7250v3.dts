@@ -155,8 +155,8 @@
 	gyro: ism1330@6a {
 		compatible = "st,ism330dlc";
 		reg = <0x6a>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <14 IRQ_TYPE_EDGE_RISING>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <0 IRQ_TYPE_EDGE_RISING>;
 		status = "okay";
 	};
 
