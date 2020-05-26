@@ -145,7 +145,7 @@
 	status = "okay";
 
 	magnet: magnetometer@1e {
-		compatible = "st,lis2mdl";
+		compatible = "st,lis2mdl_magn";
 		reg = <0x1e>;
 		interrupt-parent = <&gpio1>;
 		interrupts = <14 IRQ_TYPE_EDGE_RISING>;
