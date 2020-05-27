@@ -432,7 +432,8 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ul-ts4100-16.dtb \
 	imx6ul-ts7250v3.dtb \
 	imx6ul-ts7553v2.dtb \
-	imx6ul-ts7100-0.dtb
+	imx6ul-ts7100-0.dtb \
+	imx6ul-tsmflow.dtb
 dtb-$(CONFIG_SOC_IMX7D) += \
 	imx7d-cl-som-imx7.dtb \
 	imx7d-colibri-eval-v3.dtb \
