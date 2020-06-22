@@ -218,7 +218,7 @@
 		spi-max-frequency = <24000000>;
 		wilc3000,reset-gpios = <&gpio5 5 0>;
 		wilc3000,chip-en-gpios = <&gpio5 6 0>;
-		wilc3000,irq-gpios = <&gpio3 26 0>;
+		wilc3000,irq-gpios = <&gpio3 1 0>;
 		status = "okay";
 	};
 };
@@ -281,7 +281,7 @@
 		"AN_CH4",
 		"AN_CH5",
 		"",
-		"",
+		"SEL_XBEE_USB",
 		"",
 		"FPGA_RESET",
 		"MAGNET_IRQ",
@@ -300,8 +300,8 @@
 		"UART3_RTS#",
 		"UART4_TXD",
 		"UART4_RXD",
-		"I2C_2_CLK",
-		"I2C_2_DAT";
+		"EN_DIO_FET",
+		"NIM_PWR_ON";
 };
 
 &gpio2 {
@@ -343,7 +343,7 @@
 &gpio3 {
 	gpio-line-names =
 		"EN_USB_5V",
-		"",
+		"WIFI_IRQ",
 		"",
 		"UART4_CTS#",
 		"WDOG#",
@@ -363,14 +363,14 @@
 		"LCD_PIN14",
 		"LCD_WR#",
 		"LCD_EN",
-		"UART7_TXD",
-		"UART7_RXD",
 		"LCD_RS",
-		"LCD_BIAS",
-		"NIM_PWR_ON",
-		"WIFI_IRQ#",
-		"EN_DIO_FET",
-		"SEL_XBEE_USB",
+		"SYS_RESET#",
+		"SD_CMD",
+		"SD_CLK",
+		"SD_D0",
+		"SD_D1",
+		"SD_D2",
+		"SD_D3",
 		"",
 		"",
 		"";
@@ -448,16 +448,6 @@
 		"";
 };
 
-&i2c2 {
-	clock-frequency = <100000>;
-	pinctrl-names = "default", "gpio";
-	pinctrl-0 = <&pinctrl_i2c2>;
-	pinctrl-1 = <&pinctrl_i2c2_gpio>;
-	scl-gpios = <&gpio1 30 GPIO_ACTIVE_HIGH>;
-	sda-gpios = <&gpio1 31 GPIO_ACTIVE_HIGH>;
-	status = "okay";
-};
-
 &i2c3 {
 	clock-frequency = <100000>;
 	pinctrl-names = "default", "gpio";
@@ -498,25 +488,23 @@
 	status = "okay";
 };
 
-&uart7 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart7>;
-	status = "okay";
-};
-
 &usdhc1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>;
 	no-1-8-v;
 	disable-wp;
-	broken-cd = <1>;
+	non-removable;
 	bus-width = <4>;
 	status = "okay";
 };
 
-&pwm6 {
+&usdhc2 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pwm6>;
+	pinctrl-0 = <&pinctrl_usdhc2>;
+	no-1-8-v;
+	disable-wp;
+	broken-cd;
+	bus-width = <4>;
 	status = "okay";
 };
 
@@ -758,7 +746,7 @@
 				status = "okay";
 
 				gpio-line-names =
-					"PHY_RESET#",
+					"",
 					"DIO_PIN1",
 					"DIO_PIN3",
 					"DIO_PIN5",
@@ -813,12 +801,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&ts7250v3_pinctrl_hog>;
 	imx6ul-ts7250v3 {
-		pinctrl_pwm6: pwm6grp {
-			fsl,pins = <
-				MX6UL_PAD_LCD_DATA19__PWM6_OUT	0x3020 /* LCD_BIAS */
-			>;
-		};
-
 		ts7250v3_pinctrl_hog: hoggrp {
 			fsl,pins = <
 				/*
@@ -827,7 +809,6 @@
 				 * 0x13020 == 100k PD
 				 */
 
-				/* TODO Verify pull state of these pins! */
 				MX6UL_PAD_LCD_DATA02__GPIO3_IO07	0x13020 /* ISA_RESET */
 				MX6UL_PAD_LCD_DATA03__GPIO3_IO08	0x13020 /* ISA_IOCHK */
 
@@ -841,15 +822,20 @@
 				MX6UL_PAD_LCD_DATA13__GPIO3_IO18	0x1a020 /* LCD_PIN14 */
 				MX6UL_PAD_LCD_DATA14__GPIO3_IO19	0x1a020 /* LCD_WR# */
 				MX6UL_PAD_LCD_DATA15__GPIO3_IO20	0x1a020 /* LCD_EN */
-				MX6UL_PAD_LCD_DATA18__GPIO3_IO23	0x1a020 /* LCD_RS */
-
-				MX6UL_PAD_LCD_DATA20__GPIO3_IO25	0x13020 /* NIM_PWR_ON */
-				MX6UL_PAD_LCD_DATA22__GPIO3_IO27	0x13020 /* EN_DIO_FET */
-				MX6UL_PAD_LCD_DATA23__GPIO3_IO28	0x13020 /* SEL_XBEE_USB */
-				MX6UL_PAD_LCD_CLK__GPIO3_IO00		0x1b020 /* EN_USB_5V */
+				MX6UL_PAD_LCD_DATA16__GPIO3_IO21	0x1a020 /* LCD_RS */
 
 				MX6UL_PAD_UART2_RX_DATA__GPIO1_IO21	0x13020 /* EN_XBEE_USB */
+				MX6UL_PAD_UART5_RX_DATA__GPIO1_IO31	0x13020 /* NIM_PWR_ON */
+				MX6UL_PAD_UART5_TX_DATA__GPIO1_IO30	0x13020 /* EN_DIO_FET */
+				MX6UL_PAD_JTAG_TDI__GPIO1_IO13		0x1b029 /* FPGA_RESET */
+				MX6UL_PAD_JTAG_TMS__GPIO1_IO11		0x13020 /* SEL_XBEE_USB */
 				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01	0x1b029 /* FPGA IRQ */
+
+				MX6UL_PAD_SNVS_TAMPER7__GPIO5_IO07	0x1a020 /* EN_CL_1 */
+				MX6UL_PAD_SNVS_TAMPER8__GPIO5_IO08	0x1a020 /* EN_CL_2 */
+				MX6UL_PAD_SNVS_TAMPER9__GPIO5_IO09	0x1a020 /* EN_CL_3 */
+				MX6UL_PAD_LCD_CLK__GPIO3_IO00		0x1b020 /* EN_USB_5V */
+				MX6UL_PAD_LCD_RESET__WDOG1_WDOG_ANY	0x1a020 /* WDOG# */
 				MX6UL_PAD_NAND_RE_B__GPIO4_IO00		0x1b029 /* FPGA_FLASH_SELECT */
 				MX6UL_PAD_NAND_WE_B__GPIO4_IO01		0x1b029 /* DETECT_94-120 */
 			>;
@@ -912,13 +898,6 @@
 			>;
 		};
 
-		pinctrl_uart7: uart7grp {
-			fsl,pins = <
-				MX6UL_PAD_LCD_DATA17__UART7_DCE_RX	0x1b0b1
-				MX6UL_PAD_LCD_DATA16__UART7_DCE_TX	0x1b0b1
-			>;
-		};
-
 		pinctrl_enet1: enet1grp {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO07__ENET1_MDC		0x1b0b0
@@ -963,27 +942,13 @@
 			>;
 		};
 
-		pinctrl_i2c2: i2c2grp {
-			fsl,pins = <
-				MX6UL_PAD_UART5_RX_DATA__I2C2_SDA	0x4001a8b0
-				MX6UL_PAD_UART5_TX_DATA__I2C2_SCL	0x4001a8b0
-			>;
-		};
-
-		pinctrl_i2c2_gpio: i2c2grpgpio {
-			fsl,pins = <
-				MX6UL_PAD_UART5_RX_DATA__GPIO1_IO31	0x4001a8b0
-				MX6UL_PAD_UART5_TX_DATA__GPIO1_IO30	0x4001a8b0
-			>;
-		};
-
 		pinctrl_ecspi3: ecspi3grp {
 			fsl,pins = <
 				MX6UL_PAD_NAND_READY_B__GPIO4_IO12	0x100b1 /* SPI_3_CS# */
 				MX6UL_PAD_NAND_CE0_B__ECSPI3_SCLK	0x100b1
 				MX6UL_PAD_NAND_CE1_B__ECSPI3_MOSI	0x100b1
 				MX6UL_PAD_NAND_CLE__ECSPI3_MISO		0x100b1
-				MX6UL_PAD_LCD_DATA21__GPIO3_IO26	0x100b1 /* WIFI_IRQ# */
+				MX6UL_PAD_LCD_ENABLE__GPIO3_IO01	0x100b1 /* WIFI_IRQ# */
 				MX6UL_PAD_SNVS_TAMPER5__GPIO5_IO05	0x100b1 /* WIFI_RESET# */
 				MX6UL_PAD_SNVS_TAMPER6__GPIO5_IO06	0x100b1 /* EN_WIFI_PWR */
 			>;
@@ -1014,6 +979,20 @@
 				MX6UL_PAD_SNVS_TAMPER2__GPIO5_IO02	0x1b020 /* EN_EMMC_3.3V */
 			>;
 		};
+
+		pinctrl_usdhc2: usdhc2grp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA18__USDHC2_CMD	0x17059
+				MX6UL_PAD_LCD_DATA19__USDHC2_CLK	0x10071
+				MX6UL_PAD_LCD_DATA20__USDHC2_DATA0	0x17059
+				MX6UL_PAD_LCD_DATA21__USDHC2_DATA1	0x17059
+				MX6UL_PAD_LCD_DATA22__USDHC2_DATA2	0x17059
+				MX6UL_PAD_LCD_DATA23__USDHC2_DATA3	0x17059
+				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x1b020 /* EN_SD_CARD_3.3V */
+			>;
+		};
+
+
 
 		pinctrl_dvfs: dvfsgrp {
 			fsl,pins = <
