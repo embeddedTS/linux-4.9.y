@@ -20,7 +20,8 @@
 #define TCP_ENH			BIT(8)
 #define INIT_DBG		BIT(9)
 #define PWRDEV_DBG		BIT(10)
-#define DBG_REGION_ALL		(BIT(11)-1)
+#define ERR_DBG			BIT(11)
+#define DBG_REGION_ALL		(BIT(12)-1)
 
 extern atomic_t WILC_DEBUG_REGION;
 
@@ -42,8 +43,11 @@ extern atomic_t WILC_DEBUG_REGION;
 		    ##__VA_ARGS__); } \
 	while (0)
 
-#define PRINT_ER(netdev, format, ...) netdev_err(netdev, "ERR [%s:%d] "format,\
-	__func__, __LINE__, ##__VA_ARGS__)
+#define PRINT_ER(netdev, format, ...) do { \
+	if (atomic_read(&WILC_DEBUG_REGION)&(ERR_DBG))\
+		netdev_err(netdev, "ERR [%s:%d] "format,\
+	__func__, __LINE__, ##__VA_ARGS__); } \
+	while(0)
 
 int wilc_debugfs_init(void);
 void wilc_debugfs_remove(void);

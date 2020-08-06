@@ -24,6 +24,9 @@
 #include "wilc_wlan.h"
 #include "wilc_wlan_cfg.h"
 
+#define dev_err dev_dbg
+#define dev_warn dev_dbg
+
 #define FLOW_CTRL_LOW_THRESHLD		128
 #define FLOW_CTRL_UP_THRESHLD		256
 
