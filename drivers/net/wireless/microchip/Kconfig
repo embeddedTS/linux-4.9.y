@@ -1,8 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0
 config WILC
 	tristate
 
 config WLAN_VENDOR_MCHP
-        bool "Microchip devices"
+        bool "Microhip devices"
         default y
 	help
 	This adds support for WILC1000 & WILC3000 chips which support
