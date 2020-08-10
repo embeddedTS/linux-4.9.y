@@ -740,8 +740,7 @@ void chip_allow_sleep(struct wilc *wilc, int source)
 
 	if (((source == DEV_WIFI) && (wilc->keep_awake[DEV_BT] == true)) ||
 	    ((source == DEV_BT) && (wilc->keep_awake[DEV_WIFI] == true)))
-		pr_warn("Another device is preventing allow sleep operation. request source is %s\n",
-			  (source == DEV_WIFI ? "Wifi" : "BT"));
+		;
 	else
 		if (wilc->chip == WILC_1000)
 			ret = chip_allow_sleep_wilc1000(wilc, source);
