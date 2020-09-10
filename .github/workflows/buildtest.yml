@@ -1,0 +1,21 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*-ts'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-armhf build-essential lzop
+      - name: Make
+        run: |
+          CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm LOADADDR=0x80800000 make tsimx6ul_defconfig
+          CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm LOADADDR=0x80800000 make zImage
+          CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm LOADADDR=0x80800000 make modules
