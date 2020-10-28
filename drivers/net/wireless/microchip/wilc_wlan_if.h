@@ -16,81 +16,27 @@
  *
  ********************************************/
 
-#define HIF_SDIO		(0)
-#define HIF_SPI			BIT(0)
-#define HIF_SDIO_GPIO_IRQ	BIT(2)
-
 #define	FW_WILC1000_WIFi		"mchp/wilc1000_wifi_firmware.bin"
 #define	FW_WILC3000_WIFI		"mchp/wilc3000_wifi_firmware.bin"
 #define	FW_WILC3000_BLE		"mchp/wilc3000_ble_firmware.bin"
 
-/********************************************
- *
- *      Wlan Interface Defines
- *
- ********************************************/
-
-struct sdio_cmd52 {
-	u32 read_write:		1;
-	u32 function:		3;
-	u32 raw:		1;
-	u32 address:		17;
-	u32 data:		8;
-};
-
-struct sdio_cmd53 {
-	u32 read_write:		1;
-	u32 function:		3;
-	u32 block_mode:		1;
-	u32 increment:		1;
-	u32 address:		17;
-	u32 count:		9;
-	u8 *buffer;
-	u32 block_size;
-};
-
-#define MAC_STATUS_INIT			-1
-#define MAC_STATUS_CONNECTED		1
-#define MAC_STATUS_DISCONNECTED		0
-
-struct tx_complete_data {
-	int size;
-	void *buff;
-	u8 *bssid;
-	struct sk_buff *skb;
-	struct wilc_vif *vif;
-};
-
-typedef void (*wilc_tx_complete_func_t)(void *, int);
-
-#define WILC_TX_ERR_NO_BUF	(-2)
-
-/********************************************
- *
- *      Wlan Configuration ID
- *
- ********************************************/
-#define WILC_MULTICAST_TABLE_SIZE	8
-#define MAX_SSID_LEN            33
-#define MAX_RATES_SUPPORTED     12
-
 enum bss_types {
-	INFRASTRUCTURE		= 0,
-	INDEPENDENT,
-	AP,
+	WILC_FW_BSS_TYPE_INFRA = 0,
+	WILC_FW_BSS_TYPE_INDEPENDENT,
+	WILC_FW_BSS_TYPE_AP,
 };
 
 enum {
-	B_ONLY_MODE		= 0,    /* 1, 2 M, otherwise 5, 11 M */
-	G_ONLY_MODE,			/* 6,12,24 otherwise 9,18,36,48,54 */
-	G_MIXED_11B_1_MODE,		/* 1,2,5.5,11 otherwise all on */
-	G_MIXED_11B_2_MODE,		/* 1,2,5,11,6,12,24 otherwise all on */
+	WILC_FW_OPER_MODE_B_ONLY = 0,	 /* 1, 2 M, otherwise 5, 11 M */
+	WILC_FW_OPER_MODE_G_ONLY,	 /* 6,12,24 otherwise 9,18,36,48,54 */
+	WILC_FW_OPER_MODE_G_MIXED_11B_1, /* 1,2,5.5,11 otherwise all on */
+	WILC_FW_OPER_MODE_G_MIXED_11B_2, /* 1,2,5,11,6,12,24 otherwise all on */
 };
 
 enum {
-	G_SHORT_PREAMBLE	= 0,	/* Short Preamble */
-	G_LONG_PREAMBLE		= 1,	/* Long Preamble */
-	G_AUTO_PREAMBLE		= 2,	/* Auto Preamble Selection */
+	WILC_FW_PREAMBLE_SHORT = 0,	/* Short Preamble */
+	WILC_FW_PREAMBLE_LONG = 1,	/* Long Preamble */
+	WILC_FW_PREAMBLE_AUTO = 2,	/* Auto Preamble Selection */
 };
 
 #define DEV_WIFI	0
@@ -98,108 +44,147 @@ enum {
 #define DEV_MAX		2
 
 enum {
-	PASSIVE_SCAN		= 0,
-	ACTIVE_SCAN		= 1,
+	WILC_FW_PASSIVE_SCAN = 0,
+	WILC_FW_ACTIVE_SCAN = 1,
 };
 
 enum {
-	NO_POWERSAVE		= 0,
-	MIN_FAST_PS		= 1,
-	MAX_FAST_PS		= 2,
-	MIN_PSPOLL_PS		= 3,
-	MAX_PSPOLL_PS		= 4
+	WILC_FW_NO_POWERSAVE = 0,
+	WILC_FW_MIN_FAST_PS = 1,
+	WILC_FW_MAX_FAST_PS = 2,
+	WILC_FW_MIN_PSPOLL_PS = 3,
+	WILC_FW_MAX_PSPOLL_PS = 4
 };
 
 enum bus_acquire {
-	ACQUIRE_ONLY            = 0,
-	ACQUIRE_AND_WAKEUP	= 1,
+	WILC_BUS_ACQUIRE_ONLY = 0,
+	WILC_BUS_ACQUIRE_AND_WAKEUP = 1,
 };
 
 enum bus_release {
-	RELEASE_ONLY		= 0,
-	RELEASE_ALLOW_SLEEP	= 1,
+	WILC_BUS_RELEASE_ONLY = 0,
+	WILC_BUS_RELEASE_ALLOW_SLEEP = 1,
 };
 
 enum {
-	NO_SECURITY		= 0,
-	WEP_40			= 0x3,
-	WEP_104			= 0x7,
-	WPA_AES			= 0x29,
-	WPA_TKIP		= 0x49,
-	WPA_AES_TKIP		= 0x69,	/* Aes or Tkip */
-	WPA2_AES		= 0x31,
-	WPA2_TKIP		= 0x51,
-	WPA2_AES_TKIP		= 0x71,	/* Aes or Tkip */
+	WILC_FW_NO_ENCRYPT = 0,
+	WILC_FW_ENCRYPT_ENABLED = BIT(0),
+	WILC_FW_WEP = BIT(1),
+	WILC_FW_WEP_EXTENDED = BIT(2),
+	WILC_FW_WPA = BIT(3),
+	WILC_FW_WPA2 = BIT(4),
+	WILC_FW_AES = BIT(5),
+	WILC_FW_TKIP = BIT(6)
+};
+
+enum {
+	WILC_FW_SEC_NO = WILC_FW_NO_ENCRYPT,
+	WILC_FW_SEC_WEP = WILC_FW_WEP | WILC_FW_ENCRYPT_ENABLED,
+	WILC_FW_SEC_WEP_EXTENDED = WILC_FW_WEP_EXTENDED | WILC_FW_SEC_WEP,
+	WILC_FW_SEC_WPA = WILC_FW_WPA | WILC_FW_ENCRYPT_ENABLED,
+	WILC_FW_SEC_WPA_AES = WILC_FW_AES | WILC_FW_SEC_WPA,
+	WILC_FW_SEC_WPA_TKIP = WILC_FW_TKIP | WILC_FW_SEC_WPA,
+	WILC_FW_SEC_WPA2 = WILC_FW_WPA2 | WILC_FW_ENCRYPT_ENABLED,
+	WILC_FW_SEC_WPA2_AES = WILC_FW_AES | WILC_FW_SEC_WPA2,
+	WILC_FW_SEC_WPA2_TKIP = WILC_FW_TKIP | WILC_FW_SEC_WPA2
 };
 
 enum authtype {
-	OPEN_SYSTEM		= 1,
-	SHARED_KEY		= 2,
-	ANY			= 3,
-	IEEE8021		= 5
+	WILC_FW_AUTH_OPEN_SYSTEM = 1,
+	WILC_FW_AUTH_SHARED_KEY = 2,
+	WILC_FW_AUTH_ANY = 3,
+	WILC_FW_AUTH_IEEE8021 = 5
 };
 
 enum site_survey {
-	SITE_SURVEY_1CH		= 0,
-	SITE_SURVEY_ALL_CH	= 1,
-	SITE_SURVEY_OFF		= 2
+	WILC_FW_SITE_SURVEY_1CH = 0,
+	WILC_FW_SITE_SURVEY_ALL_CH = 1,
+	WILC_FW_SITE_SURVEY_OFF = 2
 };
 
 enum {
-	NORMAL_ACK		= 0,
-	NO_ACK,
+	WILC_FW_ACK_POLICY_NORMAL = 0,
+	WILC_FW_ACK_NO_POLICY,
 };
 
 enum {
-	REKEY_DISABLE		= 1,
-	REKEY_TIME_BASE,
-	REKEY_PKT_BASE,
-	REKEY_TIME_PKT_BASE
+	WILC_FW_REKEY_POLICY_DISABLE = 1,
+	WILC_FW_REKEY_POLICY_TIME_BASE,
+	WILC_FW_REKEY_POLICY_PKT_BASE,
+	WILC_FW_REKEY_POLICY_TIME_PKT_BASE
 };
 
 enum {
-	FILTER_NO		= 0x00,
-	FILTER_AP_ONLY		= 0x01,
-	FILTER_STA_ONLY		= 0x02
+	WILC_FW_FILTER_NO = 0x00,
+	WILC_FW_FILTER_AP_ONLY = 0x01,
+	WILC_FW_FILTER_STA_ONLY = 0x02
 };
 
 enum {
-	AUTO_PROT		= 0,	/* Auto */
-	NO_PROT,			/* Do not use any protection */
-	ERP_PROT,			/* Protect all ERP frame exchanges */
-	HT_PROT,			/* Protect all HT frame exchanges  */
-	GF_PROT,			/* Protect all GF frame exchanges  */
+	WILC_FW_11N_PROT_AUTO = 0,	/* Auto */
+	WILC_FW_11N_NO_PROT,		/* Do not use any protection */
+	WILC_FW_11N_PROT_ERP,		/* Protect all ERP frame exchanges */
+	WILC_FW_11N_PROT_HT,		/* Protect all HT frame exchanges  */
+	WILC_FW_11N_PROT_GF		/* Protect all GF frame exchanges  */
 };
 
 enum {
-	G_SELF_CTS_PROT,
-	G_RTS_CTS_PROT,
+	WILC_FW_ERP_PROT_SELF_CTS,
+	WILC_FW_ERP_PROT_RTS_CTS,
 };
 
 enum {
-	HT_MIXED_MODE		= 1,
-	HT_ONLY_20MHZ_MODE,
-	HT_ONLY_20_40MHZ_MODE,
+	WILC_FW_11N_OP_MODE_HT_MIXED = 1,
+	WILC_FW_11N_OP_MODE_HT_ONLY_20MHZ,
+	WILC_FW_11N_OP_MODE_HT_ONLY_20_40MHZ,
 };
 
 enum {
-	NO_DETECT		= 0,
-	DETECT_ONLY		= 1,
-	DETECT_PROTECT		= 2,
-	DETECT_PROTECT_REPORT	= 3,
+	WILC_FW_OBBS_NONHT_NO_DETECT = 0,
+	WILC_FW_OBBS_NONHT_DETECT_ONLY = 1,
+	WILC_FW_OBBS_NONHT_DETECT_PROTECT = 2,
+	WILC_FW_OBBS_NONHT_DETECT_PROTECT_REPORT = 3,
 };
 
 enum {
-	RTS_CTS_NONHT_PROT	= 0,	/* RTS-CTS at non-HT rate */
-	FIRST_FRAME_NONHT_PROT,		/* First frame at non-HT rate */
-	LSIG_TXOP_PROT,                 /* LSIG TXOP Protection */
-	FIRST_FRAME_MIXED_PROT,		/* First frame at Mixed format */
+	WILC_FW_HT_PROT_RTS_CTS_NONHT = 0,  /* RTS-CTS at non-HT rate */
+	WILC_FW_HT_PROT_FIRST_FRAME_NONHT,  /* First frame at non-HT rate */
+	WILC_FW_HT_PROT_LSIG_TXOP,	    /* LSIG TXOP Protection */
+	WILC_FW_HT_PROT_FIRST_FRAME_MIXED,  /* First frame at Mixed format */
 };
 
 enum {
-	STATIC_MODE		= 1,
-	DYNAMIC_MODE		= 2,
-	MIMO_MODE		= 3,	/* power save disable */
+	WILC_FW_SMPS_MODE_STATIC = 1,
+	WILC_FW_SMPS_MODE_DYNAMIC = 2,
+	WILC_FW_SMPS_MODE_MIMO = 3,	/* power save disable */
+};
+
+enum {
+	WILC_FW_TX_RATE_AUTO = 0,
+	WILC_FW_TX_RATE_MBPS_1 = 1,
+	WILC_FW_TX_RATE_MBPS_2 = 2,
+	WILC_FW_TX_RATE_MBPS_5_5 = 5,
+	WILC_FW_TX_RATE_MBPS_11 = 11,
+	WILC_FW_TX_RATE_MBPS_6 = 6,
+	WILC_FW_TX_RATE_MBPS_9 = 9,
+	WILC_FW_TX_RATE_MBPS_12 = 12,
+	WILC_FW_TX_RATE_MBPS_18 = 18,
+	WILC_FW_TX_RATE_MBPS_24 = 24,
+	WILC_FW_TX_RATE_MBPS_36 = 36,
+	WILC_FW_TX_RATE_MBPS_48 = 48,
+	WILC_FW_TX_RATE_MBPS_54 = 54
+};
+
+enum {
+	WILC_FW_DEFAULT_SCAN = 0,
+	WILC_FW_USER_SCAN = BIT(0),
+	WILC_FW_OBSS_PERIODIC_SCAN = BIT(1),
+	WILC_FW_OBSS_ONETIME_SCAN = BIT(2)
+};
+
+enum {
+	WILC_FW_ACTION_FRM_IDX = 0,
+	WILC_FW_PROBE_REQ_IDX = 1
 };
 
 enum wid_type {
@@ -281,7 +266,6 @@ enum {
 	 *  -----------------------------------------------------------
 	 */
 	WID_STATUS			= 0x0005,
-	WID_BT_COEX_MODE		= 0x0006,
 
 	/*
 	 *  Scan type
@@ -376,15 +360,6 @@ enum {
 	 *  -----------------------------------------------------------
 	 */
 	WID_ACK_POLICY			= 0x0011,
-
-	/*
-	 *  Set coex null frames transmission mode
-	 * --------------------------------------------------------------
-	 *  Configuration :   Enable	Disable
-	 *  Values to set :       1			0
-	 * --------------------------------------------------------------
-	 */
-	WID_COEX_NULL_FRAMES_MODE               = 0x0013,
 
 	/*
 	 *  Reset MAC (Set only)
@@ -689,7 +664,6 @@ enum {
 	WID_TX_POWER_LEVEL_11N		= 0x00B1,
 
 	/* Custom Character WID list */
-	WID_PC_TEST_MODE		= 0x00C8,
 	/* SCAN Complete notification WID*/
 	WID_SCAN_COMPLETE		= 0x00C9,
 
@@ -721,7 +695,7 @@ enum {
 	WID_LONG_RETRY_LIMIT		= 0x1003,
 	WID_BEACON_INTERVAL		= 0x1006,
 	WID_MEMORY_ACCESS_16BIT		= 0x1008,
-
+	WID_PASSIVE_SCAN_TIME           = 0x100D,
 	WID_JOIN_START_TIMEOUT		= 0x100F,
 	WID_ASOC_TIMEOUT		= 0x1011,
 	WID_11I_PROTOCOL_TIMEOUT	= 0x1012,
@@ -761,7 +735,6 @@ enum {
 	/* NMAC Integer WID list */
 	/* Custom Integer WID list */
 	WID_GET_INACTIVE_TIME		= 0x2084,
-	WID_SET_OPERATION_MODE		= 0X2086,
 	/* EMAC String WID list */
 	WID_SSID			= 0x3000,
 	WID_FIRMWARE_VERSION		= 0x3001,
@@ -794,7 +767,7 @@ enum {
 	WID_DEVICE_NAME			= 0x3029, /*Added for CAPI tool */
 
 	/* NMAC String WID list */
-	WID_SET_DRV_HANDLER		= 0x3079,
+	WID_SET_OPERATION_MODE		= 0x3079,
 	WID_11N_P_ACTION_REQ		= 0x3080,
 	WID_HUT_TEST_ID			= 0x3081,
 	WID_PMKID_INFO			= 0x3082,

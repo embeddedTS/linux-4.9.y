@@ -4,10 +4,13 @@
  * All rights reserved.
  */
 
+#include <linux/clk.h>
 #include <linux/spi/spi.h>
 #include <linux/module.h>
 
 #include "wilc_wfi_netdevice.h"
+#include "wilc_wfi_cfgoperations.h"
+#include "wilc_netdev.h"
 
 struct wilc_spi {
 	int crc_off;
@@ -123,7 +126,7 @@ static int wilc_bus_probe(struct spi_device *spi)
 	if (!spi_priv)
 		return -ENOMEM;
 
-	ret = wilc_netdev_init(&wilc, dev, HIF_SPI, &wilc_hif_spi);
+	ret = wilc_cfg80211_init(&wilc, dev, WILC_HIF_SPI, &wilc_hif_spi);
 	if (ret) {
 		kfree(spi_priv);
 		return ret;
@@ -134,14 +137,22 @@ static int wilc_bus_probe(struct spi_device *spi)
 	wilc->bus_data = spi_priv;
 	wilc->dt_dev = &spi->dev;
 
+	wilc->rtc_clk = devm_clk_get(&spi->dev, "rtc_clk");
+	if (PTR_ERR_OR_ZERO(wilc->rtc_clk) == -EPROBE_DEFER)
+		return -EPROBE_DEFER;
+	else if (!IS_ERR(wilc->rtc_clk))
+		clk_prepare_enable(wilc->rtc_clk);
 
 	if (!init_power) {
-		wilc_wlan_power_on_sequence(wilc);
+		ret = wilc_wlan_power_on_sequence(wilc);
+		if (ret) {
+			wilc_netdev_cleanup(wilc);
+			kfree(spi_priv);
+			return ret;
+		}
 		init_power = 1;
 	}
 
-	mutex_init(&wilc->hif_cs);
-	mutex_init(&wilc->cs);
 	wilc_bt_init(wilc);
 
 	dev_info(dev, "WILC SPI probe success\n");
@@ -151,6 +162,9 @@ static int wilc_bus_probe(struct spi_device *spi)
 static int wilc_bus_remove(struct spi_device *spi)
 {
 	struct wilc *wilc = spi_get_drvdata(spi);
+
+	if (!IS_ERR(wilc->rtc_clk))
+		clk_disable_unprepare(wilc->rtc_clk);
 
 	wilc_netdev_cleanup(wilc);
 	wilc_bt_deinit();
@@ -224,6 +238,7 @@ static struct spi_driver wilc_spi_driver = {
 };
 module_spi_driver(wilc_spi_driver);
 MODULE_LICENSE("GPL");
+MODULE_VERSION("15.3");
 
 static int spi_data_rsp(struct wilc *wilc, u8 cmd)
 {
@@ -526,7 +541,11 @@ static int spi_cmd_complete(struct wilc *wilc, u8 cmd, u32 adr, u8 *b, u32 sz,
 
 	rsp = rb[rix++];
 
-	if (rsp != cmd) {
+	/*
+	 * Clockless registers operations might return unexptected responses,
+	 * even if successful.
+	 */
+	if (rsp != cmd && !clockless) {
 		dev_err(&spi->dev,
 			"Failed cmd response, cmd (%02x), resp (%02x)\n",
 			cmd, rsp);
@@ -537,7 +556,7 @@ static int spi_cmd_complete(struct wilc *wilc, u8 cmd, u32 adr, u8 *b, u32 sz,
 	 * State response
 	 */
 	rsp = rb[rix++];
-	if (rsp != 0x00) {
+	if (rsp != 0x00 && !clockless) {
 		dev_err(&spi->dev, "Failed cmd state response state (%02x)\n",
 			rsp);
 		return N_FAIL;
@@ -564,7 +583,7 @@ static int spi_cmd_complete(struct wilc *wilc, u8 cmd, u32 adr, u8 *b, u32 sz,
 				break;
 		} while (retry--);
 
-		if (retry <= 0) {
+		if (retry <= 0 && !clockless) {
 			dev_err(&spi->dev,
 				"Error, data read response (%02x)\n", rsp);
 			return N_RESET;
@@ -1023,7 +1042,7 @@ static bool wilc_spi_is_init(struct wilc *wilc)
 	return spi_priv->is_init;
 }
 
-static int _wilc_spi_deinit(struct wilc *wilc)
+static int wilc_spi_deinit(struct wilc *wilc)
 {
 	struct wilc_spi *spi_priv = wilc->bus_data;
 
@@ -1147,20 +1166,13 @@ static int wilc_spi_read_size(struct wilc *wilc, u32 *size)
 
 static int wilc_spi_read_int(struct wilc *wilc, u32 *int_status)
 {
-	int ret;
-
-	ret = spi_internal_read(wilc, 0xe840 - WILC_SPI_REG_BASE,
+	return spi_internal_read(wilc, 0xe840 - WILC_SPI_REG_BASE,
 				int_status);
-
-	return ret;
 }
 
 static int wilc_spi_clear_int_ext(struct wilc *wilc, u32 val)
 {
-	int ret;
-
-	ret = spi_internal_write(wilc, 0xe844 - WILC_SPI_REG_BASE, val);
-	return ret;
+	return spi_internal_write(wilc, 0xe844 - WILC_SPI_REG_BASE, val);
 }
 
 static int wilc_spi_sync_ext(struct wilc *wilc, int nint)
@@ -1238,7 +1250,7 @@ static int wilc_spi_sync_ext(struct wilc *wilc, int nint)
 /* Global spi HIF function table */
 static const struct wilc_hif_func wilc_hif_spi = {
 	.hif_init = wilc_spi_init,
-	.hif_deinit = _wilc_spi_deinit,
+	.hif_deinit = wilc_spi_deinit,
 	.hif_read_reg = wilc_spi_read_reg,
 	.hif_write_reg = wilc_spi_write_reg,
 	.hif_block_rx = wilc_spi_read,
