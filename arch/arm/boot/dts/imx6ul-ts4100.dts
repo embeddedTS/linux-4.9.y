@@ -27,5 +27,5 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-1 = <&pinctrl_cam_gpio &pinctrl_lcd_gpio>;
+	pinctrl-0 = <&pinctrl_cam_gpio &pinctrl_lcd_gpio &ts4100_pinctrl_hog>;
 };
