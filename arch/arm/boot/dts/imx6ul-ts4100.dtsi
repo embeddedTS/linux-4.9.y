@@ -194,7 +194,7 @@
 		reg = <0>;
 		spi-max-frequency = <48000000>;
 		reset-gpios = <&gpio4 16 GPIO_ACTIVE_HIGH>;	/* RESET */
-		chip-en-gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>;	/* ENABLE */
+		chip_en-gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>;	/* ENABLE */
 		irq-gpios = <&gpio5 8 GPIO_ACTIVE_HIGH>;	/* IRQ */
 		status = "okay";
     };
