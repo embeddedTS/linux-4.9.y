@@ -10,15 +10,10 @@
 #include <linux/types.h>
 #include <linux/version.h>
 
-static inline bool is_wilc1000(u32 id)
-{
-	return (id & 0xfffff000) == 0x100000;
-}
+#if KERNEL_VERSION(4, 9, 0) <= LINUX_VERSION_CODE
+#include <linux/bitfield.h>
+#endif
 
-static inline bool is_wilc3000(u32 id)
-{
-	return (id & 0xfffff000) == 0x300000;
-}
 
 /********************************************
  *
@@ -67,9 +62,16 @@ static inline bool is_wilc3000(u32 id)
 #define WILC_HOST_RX_CTRL		(WILC_PERIPH_REG_BASE + 0x80)
 #define WILC_HOST_RX_EXTRA_SIZE		(WILC_PERIPH_REG_BASE + 0x84)
 #define WILC_HOST_TX_CTRL_1		(WILC_PERIPH_REG_BASE + 0x88)
-#define WILC_INTERRUPT_CORTUS_0		(WILC_PERIPH_REG_BASE + 0xa8)
 #define WILC_MISC			(WILC_PERIPH_REG_BASE + 0x428)
 #define WILC_INTR_REG_BASE		(WILC_PERIPH_REG_BASE + 0xa00)
+
+#define WILC_INTERRUPT_CORTUS_0		(WILC_PERIPH_REG_BASE + 0xa8)
+#define WILC1000_CORTUS_INTERRUPT_1	(WILC_INTERRUPT_CORTUS_0 + 0x4)
+#define WILC3000_CORTUS_INTERRUPT_1	(WILC_INTERRUPT_CORTUS_0 + 0x14)
+
+#define WILC1000_CORTUS_INTERRUPT_2	(WILC_INTERRUPT_CORTUS_0 + 0x8)
+#define WILC3000_CORTUS_INTERRUPT_2	(WILC_INTERRUPT_CORTUS_0 + 0x18)
+
 #define WILC_INTR_ENABLE		WILC_INTR_REG_BASE
 #define WILC_INTR2_ENABLE		(WILC_INTR_REG_BASE + 4)
 
@@ -101,21 +103,93 @@ static inline bool is_wilc3000(u32 id)
 #define WILC_SPI_TX_MODE		(WILC_SPI_REG_BASE + 0x20)
 #define WILC_SPI_PROTOCOL_CONFIG	(WILC_SPI_REG_BASE + 0x24)
 #define WILC_SPI_INTR_CTL		(WILC_SPI_REG_BASE + 0x2c)
+#define WILC_SPI_INT_STATUS		(WILC_SPI_REG_BASE + 0x40)
+#define WILC_SPI_INT_CLEAR		(WILC_SPI_REG_BASE + 0x44)
+
+/* WILC1000 specific */
+#define WILC1000_SPI_WAKEUP_REG	0x1
+#define WILC1000_SPI_WAKEUP_BIT	BIT(1)
+
+#define WILC1000_SPI_CLK_STATUS_REG	0x0f
+#define WILC1000_SPI_CLK_STATUS_BIT	BIT(2)
+
+/* WILC3000 specific */
+#define WILC3000_SPI_WAKEUP_REG	0x1
+#define WILC3000_SPI_WAKEUP_BIT	BIT(1)
+
+#define WILC3000_SPI_CLK_STATUS_REG	0x13
+#define WILC3000_SPI_CLK_STATUS_BIT	BIT(2)
+
+#define WILC_SPI_HOST_TO_FW_REG		0x0b
+#define WILC_SPI_HOST_TO_FW_BIT		BIT(0)
+
+#define WILC_SPI_FW_TO_HOST_REG		0x10
+#define WILC_SPI_FW_TO_HOST_BIT		BIT(0)
 
 #define WILC_SPI_PROTOCOL_OFFSET	(WILC_SPI_PROTOCOL_CONFIG - \
 					 WILC_SPI_REG_BASE)
 
+#define WILC_SPI_CLOCKLESS_ADDR_LIMIT	0x30
+
+/* Functions IO enables bits */
+#define WILC_SDIO_CCCR_IO_EN_FUNC1	BIT(1)
+
+/* Function/Interrupt enables bits */
+#define WILC_SDIO_CCCR_IEN_MASTER	BIT(0)
+#define WILC_SDIO_CCCR_IEN_FUNC1	BIT(1)
+
+/* Abort CCCR register bits */
+#define WILC_SDIO_CCCR_ABORT_RESET	BIT(3)
+
+/* Vendor specific CCCR registers */
+/* WILC1000 */
+#define WILC1000_SDIO_WAKEUP_REG	0xf0
+#define WILC1000_SDIO_WAKEUP_BIT	BIT(0)
+
+#define WILC1000_SDIO_CLK_STATUS_REG	0xf1
+#define WILC1000_SDIO_CLK_STATUS_BIT	BIT(0)
+
+#define WILC1000_SDIO_IRQ_FLAG_REG	0xf7
+#define WILC1000_SDIO_IRQ_CLEAR_FLAG_REG	0xf8
+
+/* WILC3000 specific */
+#define WILC3000_SDIO_WAKEUP_REG	0xf0
+#define WILC3000_SDIO_WAKEUP_BIT	BIT(0)
+
+#define WILC3000_SDIO_CLK_STATUS_REG	0xf0 /* clk & wakeup are on same reg*/
+#define WILC3000_SDIO_CLK_STATUS_BIT	BIT(4)
+
+#define WILC3000_SDIO_IRQ_FLAG_REG	0xfe
+#define WILC3000_SDIO_IRQ_CLEAR_FLAG_REG	0xfe
+#define WILC3000_SDIO_VMM_TBL_CTRL_REG	0xf1
+
+/* Common vendor specific CCCR register */
+#define WILC_SDIO_INTERRUPT_DATA_SZ_REG	0xf2 /* Read size (2 bytes) */
+
+#define WILC_SDIO_VMM_TBL_CTRL_REG	0xf6
+
+#define WILC_SDIO_HOST_TO_FW_REG	0xfa
+#define WILC_SDIO_HOST_TO_FW_BIT	BIT(0)
+
+#define WILC_SDIO_FW_TO_HOST_REG	0xfc
+#define WILC_SDIO_FW_TO_HOST_BIT	BIT(0)
+
+/* Function 1 specific FBR register */
+#define WILC_SDIO_FBR_CSA_REG		0x10C /* CSA pointer (3 bytes) */
+#define WILC_SDIO_FBR_DATA_REG		0x10F
+
+#define WILC_SDIO_F1_DATA_REG		0x0
+#define WILC_SDIO_EXT_IRQ_FLAG_REG	0x4
+
 #define WILC_AHB_DATA_MEM_BASE		0x30000
 #define WILC_AHB_SHARE_MEM_BASE		0xd0000
 
-#define VMM_TBL_RX_SHADOW_BASE		WILC_AHB_SHARE_MEM_BASE
-#define VMM_TBL_RX_SHADOW_SIZE		256
+#define WILC_VMM_TBL_RX_SHADOW_BASE	WILC_AHB_SHARE_MEM_BASE
+#define WILC_VMM_TBL_RX_SHADOW_SIZE	256
 
-#define WILC_FW_HOST_COMM		0x13c0
 #define WILC_GP_REG_0			0x149c
 #define WILC_GP_REG_1			0x14a0
 
-#define WILC_COEXIST_CTL		0x161E00
 #define GLOBAL_MODE_CONTROL		0x1614
 #define PWR_SEQ_MISC_CTRL		0x3008
 #define COE_AUTO_PS_ON_NULL_PKT		0x160468
@@ -126,6 +200,33 @@ static inline bool is_wilc3000(u32 id)
 #define WILC_HAVE_SDIO_IRQ_GPIO		BIT(0)
 #define WILC_HAVE_SLEEP_CLK_SRC_RTC	BIT(2)
 #define WILC_HAVE_SLEEP_CLK_SRC_XO	BIT(3)
+
+/* tx control register 1 to 4 for RX */
+#define WILC_REG_4_TO_1_RX		0x1e1c
+
+/* tx control register 1 to 4 for TX Bank_0 */
+#define WILC_REG_4_TO_1_TX_BANK0	0x1e9c
+
+#define WILC_CORTUS_RESET_MUX_SEL	0x1118
+#define WILC_CORTUS_BOOT_REGISTER	0xc0000
+#define WILC3000_CHIP_ID		0x3b0000
+
+#define WILC_CORTUS_BOOT_FROM_IRAM	0x71
+
+#define WILC_1000_BASE_ID		0x100000
+#define WILC_3000_BASE_ID		0x300000
+
+#define WILC_CHIP_REV_FIELD		GENMASK(11, 0)
+
+static inline bool is_wilc1000(u32 id)
+{
+	return (id & (~WILC_CHIP_REV_FIELD)) == WILC_1000_BASE_ID;
+}
+
+static inline bool is_wilc3000(u32 id)
+{
+	return (id & (~WILC_CHIP_REV_FIELD)) == WILC_3000_BASE_ID;
+}
 
 /********************************************
  *
@@ -142,26 +243,44 @@ static inline bool is_wilc3000(u32 id)
 #define WILC_CFG_RSP		1
 #define WILC_CFG_RSP_STATUS	2
 #define WILC_CFG_RSP_SCAN	3
+
 #define WILC_ABORT_REQ_BIT		BIT(31)
 
 #define WILC_RX_BUFF_SIZE	(96 * 1024)
 #define WILC_TX_BUFF_SIZE	(64 * 1024)
 
 #define MODALIAS		"WILC_SPI"
-#define GPIO_NUM		0x5B
 #define GPIO_NUM_CHIP_EN	94
 #define GPIO_NUM_RESET		60
 
 #define NQUEUES			4
-#define VO_AC_COUNT_POS		25
-#define VO_AC_ACM_STAT_POS	24
-#define VI_AC_COUNT_POS		17
-#define VI_AC_ACM_STAT_POS	16
-#define BE_AC_COUNT_POS		9
-#define BE_AC_ACM_STAT_POS	8
-#define BK_AC_COUNT_POS		2
-#define BK_AC_ACM_STAT_POS	1
 #define AC_BUFFER_SIZE		1000
+
+#define VO_AC_COUNT_FIELD		GENMASK(31, 25)
+#define VO_AC_ACM_STAT_FIELD		BIT(24)
+#define VI_AC_COUNT_FIELD		GENMASK(23, 17)
+#define VI_AC_ACM_STAT_FIELD		BIT(16)
+#define BE_AC_COUNT_FIELD		GENMASK(15, 9)
+#define BE_AC_ACM_STAT_FIELD		BIT(8)
+#define BK_AC_COUNT_FIELD		GENMASK(7, 3)
+#define BK_AC_ACM_STAT_FIELD		BIT(1)
+
+#define WILC_PKT_HDR_CONFIG_FIELD	BIT(31)
+#define WILC_PKT_HDR_OFFSET_FIELD	GENMASK(30, 22)
+#define WILC_PKT_HDR_TOTAL_LEN_FIELD	GENMASK(21, 11)
+#define WILC_PKT_HDR_LEN_FIELD		GENMASK(10, 0)
+
+#define WILC_INTERRUPT_DATA_SIZE	GENMASK(14, 0)
+
+#define WILC_VMM_BUFFER_SIZE		GENMASK(9, 0)
+
+#define WILC_VMM_HDR_TYPE		BIT(31)
+#define WILC_VMM_HDR_MGMT_FIELD		BIT(30)
+#define WILC_VMM_HDR_PKT_SIZE		GENMASK(29, 15)
+#define WILC_VMM_HDR_BUFF_SIZE		GENMASK(14, 0)
+
+#define WILC_VMM_ENTRY_COUNT		GENMASK(8, 3)
+#define WILC_VMM_ENTRY_AVAILABLE	BIT(2)
 /*******************************************/
 /*        E0 and later Interrupt flags.    */
 /*******************************************/
@@ -177,13 +296,15 @@ static inline bool is_wilc3000(u32 id)
 /* 21: INT5 flag                           */
 /*******************************************/
 #define IRG_FLAGS_OFFSET	16
-#define IRQ_DMA_WD_CNT_MASK	((1ul << IRG_FLAGS_OFFSET) - 1)
+#define IRQ_DMA_WD_CNT_MASK	GENMASK(IRG_FLAGS_OFFSET - 1, 0)
 #define INT_0			BIT(IRG_FLAGS_OFFSET)
 #define INT_1			BIT(IRG_FLAGS_OFFSET + 1)
 #define INT_2			BIT(IRG_FLAGS_OFFSET + 2)
 #define INT_3			BIT(IRG_FLAGS_OFFSET + 3)
 #define INT_4			BIT(IRG_FLAGS_OFFSET + 4)
 #define MAX_NUM_INT		5
+#define IRG_FLAGS_MASK		GENMASK(IRG_FLAGS_OFFSET + MAX_NUM_INT, \
+					IRG_FLAGS_OFFSET)
 
 /*******************************************/
 /*        E0 and later Interrupt flags.    */
@@ -209,14 +330,15 @@ static inline bool is_wilc3000(u32 id)
 #define EN_VMM			BIT(8)
 
 #define DATA_INT_EXT		INT_0
-#define ALL_INT_EXT		(DATA_INT_EXT)
+#define ALL_INT_EXT		DATA_INT_EXT
 #define NUM_INT_EXT		1
+#define UNHANDLED_IRQ_MASK	GENMASK(MAX_NUM_INT - 1, NUM_INT_EXT)
 
 #define DATA_INT_CLR		CLR_INT0
 
 #define ENABLE_RX_VMM		(SEL_VMM_TBL1 | EN_VMM)
 #define ENABLE_TX_VMM		(SEL_VMM_TBL0 | EN_VMM)
-/*time for expiring the completion of cfg packets*/
+/* time for expiring the completion of cfg packets */
 #define WILC_CFG_PKTS_TIMEOUT	msecs_to_jiffies(3000)
 
 #define IS_MANAGMEMENT		0x100
@@ -224,12 +346,13 @@ static inline bool is_wilc3000(u32 id)
 #define IS_MGMT_STATUS_SUCCES	0x040
 #define IS_MON_PKT		0x020
 
+#define WILC_WID_TYPE		GENMASK(15, 12)
+#define WILC_VMM_ENTRY_FULL_RETRY	1
 /********************************************
  *
  *      Tx/Rx Queue Structure
  *
  ********************************************/
-
 enum ip_pkt_priority {
 	AC_VO_Q = 0,
 	AC_VI_Q = 1,
@@ -250,10 +373,15 @@ struct txq_entry_t {
 	void (*tx_complete_func)(void *priv, int status);
 };
 
+struct txq_fw_recv_queue_stat {
+	u8 acm;
+	u8 count;
+};
+
 struct txq_handle {
 	struct txq_entry_t txq_head;
 	u16 count;
-	u8 acm;
+	struct txq_fw_recv_queue_stat fw;
 };
 
 struct rxq_entry_t {
@@ -290,6 +418,7 @@ struct wilc_hif_func {
 	void (*disable_interrupt)(struct wilc *nic);
 	int (*hif_reset)(struct wilc *wilc);
 	bool (*hif_is_init)(struct wilc *wilc);
+	int (*hif_clear_init)(struct wilc *wilc);
 };
 
 #define WILC_MAX_CFG_FRAME_SIZE		1468
@@ -318,27 +447,25 @@ struct wilc_cfg_rsp {
 	u8 seq_no;
 };
 
-struct wilc;
 struct wilc_vif;
 
 int wilc_wlan_firmware_download(struct wilc *wilc, const u8 *buffer,
 				u32 buffer_size);
 int wilc_wlan_start(struct wilc *wilc);
 int wilc_wlan_stop(struct wilc *wilc, struct wilc_vif *vif);
-int txq_add_net_pkt(struct net_device *dev, void *priv, u8 *buffer,
+int wilc_wlan_txq_add_net_pkt(struct net_device *dev,
+			      struct tx_complete_data *tx_data, u8 *buffer,
 			      u32 buffer_size,
 			      void (*tx_complete_fn)(void *, int));
-int wilc_wlan_handle_txq(struct wilc *wilc, u32 *txq_count);
+int wilc_wlan_handle_txq(struct wilc *wl, u32 *txq_count);
 void wilc_handle_isr(struct wilc *wilc);
 void wilc_wlan_cleanup(struct net_device *dev);
-int cfg_set(struct wilc_vif *vif, int start, u16 wid, u8 *buffer,
+int wilc_wlan_cfg_set(struct wilc_vif *vif, int start, u16 wid, u8 *buffer,
 		      u32 buffer_size, int commit, u32 drv_handler);
-int cfg_get(struct wilc_vif *vif, int start, u16 wid, int commit,
+int wilc_wlan_cfg_get(struct wilc_vif *vif, int start, u16 wid, int commit,
 		      u32 drv_handler);
-int txq_add_mgmt_pkt(struct net_device *dev, void *priv, u8 *buffer,
-			       u32 buffer_size,
-			       void (*tx_complete_fn)(void *, int));
-
+int wilc_wlan_txq_add_mgmt_pkt(struct net_device *dev, void *priv, u8 *buffer,
+			       u32 buffer_size, void (*func)(void *, int));
 void wilc_enable_tcp_ack_filter(struct wilc_vif *vif, bool value);
 netdev_tx_t wilc_mac_xmit(struct sk_buff *skb, struct net_device *dev);
 
@@ -349,9 +476,6 @@ void chip_allow_sleep(struct wilc *wilc, int source);
 void chip_wakeup(struct wilc *wilc, int source);
 int wilc_send_config_pkt(struct wilc_vif *vif, u8 mode, struct wid *wids,
 			 u32 count);
-int wilc_wlan_power_on_sequence(struct wilc *wilc);
-int wilc_wlan_power_off_sequence(struct wilc *wilc);
-
 void wilc_bt_init(struct wilc *wilc);
 void wilc_bt_deinit(void);
 #if KERNEL_VERSION(4, 15, 0) <= LINUX_VERSION_CODE

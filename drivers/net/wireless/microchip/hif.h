@@ -4,10 +4,10 @@
  * All rights reserved.
  */
 
-#ifndef HOST_INT_H
-#define HOST_INT_H
+#ifndef WILC_HIF_H
+#define WILC_HIF_H
 #include <linux/ieee80211.h>
-#include "wilc_wlan_if.h"
+#include "wlan_if.h"
 
 enum {
 	WILC_IDLE_MODE = 0x0,
@@ -18,14 +18,11 @@ enum {
 	WILC_MONITOR_MODE = 0x5
 };
 
-#define WILC_MAX_NUM_STA			9
-#define WILC_MAX_NUM_SCANNED_CH			14
 #define WILC_MAX_NUM_PROBED_SSID		10
 
 #define WILC_TX_MIC_KEY_LEN			8
 #define WILC_RX_MIC_KEY_LEN			8
 
-#define WILC_MAX_NUM_PMKIDS			16
 #define WILC_ADD_STA_LENGTH			40
 #define WILC_NUM_CONCURRENT_IFC			2
 
@@ -36,12 +33,6 @@ enum {
 
 #define WILC_MAX_ASSOC_RESP_FRAME_SIZE   256
 extern uint32_t cfg_packet_timeout;
-
-struct assoc_resp {
-	__le16 capab_info;
-	__le16 status_code;
-	__le16 aid;
-} __packed;
 
 struct rf_info {
 	u8 link_speed;
@@ -60,16 +51,6 @@ enum host_if_state {
 	HOST_IF_P2P_LISTEN		= 5,
 	HOST_IF_FORCE_32BIT		= 0xFFFFFFFF
 };
-
-struct wilc_pmkid {
-	u8 bssid[ETH_ALEN];
-	u8 pmkid[WLAN_PMKID_LEN];
-} __packed;
-
-struct wilc_pmkid_attr {
-	u8 numpmkid;
-	struct wilc_pmkid pmkidlist[WILC_MAX_NUM_PMKIDS];
-} __packed;
 
 struct cfg_param_attr {
 	u32 flag;
@@ -94,9 +75,9 @@ enum scan_event {
 };
 
 enum conn_event {
-	EVENT_CONN_RESP		= 0,
-	EVENT_DISCONN_NOTIF	= 1,
-	EVENT_FORCE_32BIT		= 0xFFFFFFFF
+	CONN_DISCONN_EVENT_CONN_RESP		= 0,
+	CONN_DISCONN_EVENT_DISCONN_NOTIF	= 1,
+	CONN_DISCONN_EVENT_FORCE_32BIT		= 0xFFFFFFFF
 };
 
 enum {
@@ -118,8 +99,6 @@ struct wilc_rcvd_net_info {
 	struct ieee80211_mgmt *mgmt;
 };
 
-typedef void (*wilc_remain_on_chan_ready)(void *);
-
 struct wilc_user_scan_req {
 	void (*scan_result)(enum scan_event evt,
 			    struct wilc_rcvd_net_info *info, void *priv);
@@ -137,7 +116,7 @@ struct wilc_conn_info {
 	u8 *resp_ies;
 	u16 resp_ies_len;
 	u16 status;
-	void (*conn_result)(enum conn_event evt, u8 status, void *priv);
+	void (*conn_result)(enum conn_event evt, u8 status, void *priv_data);
 	void *arg;
 	void *param;
 };
@@ -150,6 +129,7 @@ struct wilc_remain_ch {
 	u64 cookie;
 };
 
+struct wilc;
 struct host_if_drv {
 	struct wilc_user_scan_req usr_scan_req;
 	struct wilc_conn_info conn_info;
@@ -159,10 +139,6 @@ struct host_if_drv {
 	enum host_if_state hif_state;
 
 	u8 assoc_bssid[ETH_ALEN];
-	struct completion comp_test_key_block;
-	struct completion comp_test_disconn_block;
-	struct completion comp_get_rssi;
-	struct completion comp_inactive_time;
 
 	struct timer_list scan_timer;
 	struct wilc_vif *scan_timer_vif;
@@ -231,7 +207,8 @@ int wilc_setup_multicast_filter(struct wilc_vif *vif, u32 enabled, u32 count,
 				u8 *mc_list);
 int wilc_remain_on_channel(struct wilc_vif *vif, u64 cookie,
 			   u32 duration, u16 chan,
-			   void (*expired)(void *, u64), void *user_arg);
+			   void (*expired)(void *, u64),
+			   void *user_arg);
 int wilc_listen_state_expired(struct wilc_vif *vif, u64 cookie);
 void wilc_frame_register(struct wilc_vif *vif, u16 frame_type, bool reg);
 int wilc_set_operation_mode(struct wilc_vif *vif, int index, u8 mode,
@@ -240,19 +217,18 @@ int wilc_get_statistics(struct wilc_vif *vif, struct rf_info *stats);
 int wilc_get_vif_idx(struct wilc_vif *vif);
 int wilc_set_tx_power(struct wilc_vif *vif, u8 tx_power);
 int wilc_get_tx_power(struct wilc_vif *vif, u8 *tx_power);
-/*0 select antenna 1 , 2 select antenna mode , 2 allow the firmware to choose
+void wilc_set_wowlan_trigger(struct wilc_vif *vif, bool enabled);
+/* 0 select antenna 1 , 2 select antenna mode , 2 allow the firmware to choose
  * the best antenna
  */
 int wilc_set_antenna(struct wilc_vif *vif, u8 mode);
-
-void wilc_set_wowlan_trigger(struct wilc_vif *vif, u8 wowlan_trigger);
-
-extern u8 wilc_initialized;
-s32 handle_scan_done(struct wilc_vif *vif, enum scan_event evt);
+int handle_scan_done(struct wilc_vif *vif, enum scan_event evt);
 void wilc_scan_complete_received(struct wilc *wilc, u8 *buffer, u32 length);
 void wilc_network_info_received(struct wilc *wilc, u8 *buffer, u32 length);
 void wilc_gnrl_async_info_received(struct wilc *wilc, u8 *buffer, u32 length);
 void *wilc_parse_join_bss_param(struct cfg80211_bss *bss,
 				struct cfg80211_crypto_settings *crypto);
 void handle_connect_cancel(struct wilc_vif *vif);
+int wilc_of_parse_power_pins(struct wilc *wilc);
+void wilc_wlan_power(struct wilc *wilc, bool on);
 #endif
