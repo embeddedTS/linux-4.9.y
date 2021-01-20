@@ -1,0 +1,548 @@
+/*
+ * Copyright (C) 2021 Technologic Systems
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include <dt-bindings/input/input.h>
+
+/* mikroBUS 1 peripherals */
+/ {
+	i2c_mk1: i2c_mk1 {
+		compatible = "i2c-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_mk1i2c>;
+		gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>, /* sda */
+			<&gpio3 15 GPIO_ACTIVE_HIGH>; /* scl */
+		/* i2c-gpio,delay-us = <1>; */ /* 200khz*/
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "okay";
+	};
+
+	spi_mk12: spi_mk12 {
+		compatible = "spi-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_mk12spi>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		num-chipselects = <2>;
+
+		gpio-sck = <&gpio3 7 GPIO_ACTIVE_HIGH>;
+		gpio-mosi = <&gpio3 8 GPIO_ACTIVE_HIGH>;
+		gpio-miso = <&gpio3 9 GPIO_ACTIVE_HIGH>;
+		cs-gpios = <&gpio3 10 GPIO_ACTIVE_HIGH>,
+			   <&gpio3 11 GPIO_ACTIVE_HIGH>;
+
+		status = "okay";
+
+		mk1spi: mk12spi@0 {
+			compatible = "spidev";
+			reg = <0>;
+			spi-max-frequency = <25000000>;
+		};
+
+		mk2spi: mk12spi@1 {
+			compatible = "spidev";
+			reg = <1>;
+			spi-max-frequency = <25000000>;
+		};
+	};
+
+	/* mikroBUS 2 peripherals */
+	i2c_mk2: i2c_mk2 {
+		compatible = "i2c-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_mk2i2c>;
+		gpios = <&gpio3 18 GPIO_ACTIVE_HIGH>, /* sda */
+			<&gpio3 17 GPIO_ACTIVE_HIGH>; /* scl */
+		/* i2c-gpio,delay-us = <1>; */ /* 200khz*/
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "okay";
+	};
+
+	/* mikroBUS 3 peripherals */
+	i2c_mk3: i2c_mk3 {
+		compatible = "i2c-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_mk3i2c>;
+		gpios = <&gpio3 20 GPIO_ACTIVE_HIGH>, /* sda */
+			<&gpio3 19 GPIO_ACTIVE_HIGH>; /* scl */
+		/* i2c-gpio,delay-us = <1>; */ /* 200khz*/
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "okay";
+	};
+
+	spi_mk34: spi_mk34 {
+		compatible = "spi-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_mk34spi>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		num-chipselects = <2>;
+
+		gpio-sck = <&gpio4 17 GPIO_ACTIVE_HIGH>;
+		gpio-mosi = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		gpio-miso = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		cs-gpios = <&gpio3 12 GPIO_ACTIVE_HIGH>,
+			   <&gpio3 27 GPIO_ACTIVE_HIGH>;
+
+		status = "okay";
+
+		mk3spi: mk34spi@0 {
+			compatible = "spidev";
+			reg = <0>;
+			spi-max-frequency = <25000000>;
+		};
+
+		mk4spi: mk34spi@1 {
+			compatible = "spidev";
+			reg = <1>;
+			spi-max-frequency = <25000000>;
+		};
+	};
+
+	/* mikroBUS 4 peripherals */
+	i2c_mk4: i2c_mk4 {
+		compatible = "i2c-gpio";
+		/* XXX: NOTE: This peripheral is FPGA GPIO and will be slow! */
+		gpios = <&gpio6 83 GPIO_ACTIVE_HIGH>, /* sda */
+			<&gpio6 82 GPIO_ACTIVE_HIGH>; /* scl */
+		/* i2c-gpio,delay-us = <1>; */ /* 200khz*/
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "okay";
+	};
+};
+
+&can1 {
+	status = "disabled";
+};
+
+&can2 {
+	status = "disabled";
+};
+
+/*  adc1 is currently using IO09,to use pwm2 remove IO09 from the ADC
+ *  definition and set pwm2 peripheral to "okay
+ */
+&adc1 {
+	status = "disabled";
+};
+
+&pwm2 {
+	status = "okay";
+};
+
+/* Disabled here insce it conflicts IOMUX */
+&pwm5 {
+	status = "disabled";
+};
+
+&pwm6 {
+	status = "disabled";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2 &pinctrl_uart2_txen>;
+
+        uart-has-rtscts;
+        rts-gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
+        linux,rs485-enabled-at-boot-time;
+
+	status = "okay";
+};
+
+&uart8 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart8>;
+
+        uart-has-rtscts;
+        rts-gpios = <&gpio1 22 GPIO_ACTIVE_HIGH>;
+        linux,rs485-enabled-at-boot-time;
+
+	status = "okay";
+};
+
+/* Add offbd SPI support */
+&ecspi3 {
+        fsl,spi-num-chipselects = <2>;
+        cs-gpios = <&gpio4 12 0>, <&gpio4 10 0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pinctrl_ecspi3>;
+        status = "okay";
+
+        spidevfpga: spi@0 {
+                compatible = "spidev";
+                reg = <0>;
+                spi-max-frequency = <1000000>;
+        };
+
+        spioffbd: spi@1 {
+                compatible = "spidev";
+                reg = <1>;
+                spi-max-frequency = <1000000>;
+        };
+};
+
+
+&i2c3 {
+	strtc: m41t00s@68 {
+		compatible = "m41t00";
+		reg = <0x68>;
+	};
+
+	pca9671_R1_01_16: gpio@20 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x20>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN44_P35",
+			"CN44_P33",
+			"CN44_P31",
+			"CN44_P29",
+			"CN44_P27",
+			"CN44_P25",
+			"CN44_P23",
+			"CN44_P21",
+			"CN44_P19",
+			"CN44_P17",
+			"CN44_P15",
+			"CN44_P13",
+			"CN44_P11",
+			"CN44_P09",
+			"CN44_P07",
+			"CN44_P05";
+	};
+
+	pca9671_R1_17_32: gpio@21 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x21>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN44_P06",
+			"CN44_P08",
+			"CN44_P10",
+			"CN44_P12",
+			"CN44_P14",
+			"CN44_P16",
+			"CN44_P18",
+			"CN44_P20",
+			"CN44_P22",
+			"CN44_P24",
+			"CN44_P26",
+			"CN44_P28",
+			"CN44_P30",
+			"CN44_P32",
+			"CN44_P34",
+			"CN44_P36";
+	};
+
+	pca9671_R2_01_16: gpio@23 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x23>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN41_P35",
+			"CN41_P33",
+			"CN41_P31",
+			"CN41_P29",
+			"CN41_P27",
+			"CN41_P25",
+			"CN41_P23",
+			"CN41_P21",
+			"CN41_P19",
+			"CN41_P17",
+			"CN41_P15",
+			"CN41_P13",
+			"CN41_P11",
+			"CN41_P09",
+			"CN41_P07",
+			"CN41_P05";
+	};
+
+	pca9671_R2_17_32: gpio@22 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x22>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN41_P06",
+			"CN41_P08",
+			"CN41_P10",
+			"CN41_P12",
+			"CN41_P14",
+			"CN41_P16",
+			"CN41_P18",
+			"CN41_P20",
+			"CN41_P22",
+			"CN41_P24",
+			"CN41_P26",
+			"CN41_P28",
+			"CN41_P30",
+			"CN41_P32",
+			"CN41_P34",
+			"CN41_P36";
+	};
+
+	pca9671_R3_01_16: gpio@24 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x24>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN42_P35",
+			"CN42_P33",
+			"CN42_P31",
+			"CN42_P29",
+			"CN42_P27",
+			"CN42_P25",
+			"CN42_P23",
+			"CN42_P21",
+			"CN42_P19",
+			"CN42_P17",
+			"CN42_P15",
+			"CN42_P13",
+			"CN42_P11",
+			"CN42_P09",
+			"CN42_P07",
+			"CN42_P05";
+	};
+
+	pca9671_R3_17_32: gpio@25 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x25>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN42_P06",
+			"CN42_P08",
+			"CN42_P10",
+			"CN42_P12",
+			"CN42_P14",
+			"CN42_P16",
+			"CN42_P18",
+			"CN42_P20",
+			"CN42_P22",
+			"CN42_P24",
+			"CN42_P26",
+			"CN42_P28",
+			"CN42_P30",
+			"CN42_P32",
+			"CN42_P34",
+			"CN42_P36";
+	};
+
+	pca9671_R4_01_16: gpio@27 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x27>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN43_P35",
+			"CN43_P33",
+			"CN43_P31",
+			"CN43_P29",
+			"CN43_P27",
+			"CN43_P25",
+			"CN43_P23",
+			"CN43_P21",
+			"CN43_P19",
+			"CN43_P17",
+			"CN43_P15",
+			"CN43_P13",
+			"CN43_P11",
+			"CN43_P09",
+			"CN43_P07",
+			"CN43_P05";
+	};
+
+	pca9671_R4_17_32: gpio@26 {
+		compatible = "nxp,pca9671";
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		reg = <0x26>;
+		status = "okay";
+
+		gpio-line-names =
+			"CN43_P06",
+			"CN43_P08",
+			"CN43_P10",
+			"CN43_P12",
+			"CN43_P14",
+			"CN43_P16",
+			"CN43_P18",
+			"CN43_P20",
+			"CN43_P22",
+			"CN43_P24",
+			"CN43_P26",
+			"CN43_P28",
+			"CN43_P30",
+			"CN43_P32",
+			"CN43_P34",
+			"CN43_P36";
+	};
+};
+
+/* XXX: Consider adding CPU GPIO names here? */
+
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ts4100_pinctrl_hog &pinctrl_lh300_hog>;
+
+	imx6ul-tslh300-ts4100 {
+		pinctrl_lh300_hog: gpiolh300 {
+			fsl,pins = <
+				/* LCD Interface pins */
+				MX6UL_PAD_LCD_DATA23__GPIO3_IO28        0x1b020
+
+				/* CPU FAULT_N pin, no pull since hardware PD */
+				MX6UL_PAD_JTAG_TCK__GPIO1_IO14		0x1a020
+
+				/* Generally, INT pins are active high outputs
+				 * from the click boards. Usually with a pull res
+				 * on the board. Use a keeper in CPU */
+				/* MK1-4 INT */
+				MX6UL_PAD_LCD_DATA18__GPIO3_IO23	0x1a020
+				MX6UL_PAD_LCD_DATA19__GPIO3_IO24	0x1a020
+				MX6UL_PAD_LCD_CLK__GPIO3_IO00           0x1a020
+				MX6UL_PAD_LCD_HSYNC__GPIO3_IO02         0x1a020
+
+				/* Generally, RST pins are active low inputs to
+				 * the clock boards. They usually have a pull res
+				 * on them. Use a keeper in CPU for sanity */
+				/* MK1-4 RST */
+				MX6UL_PAD_CSI_DATA03__GPIO4_IO24	0x1a020
+				MX6UL_PAD_CSI_DATA04__GPIO4_IO25	0x1a020
+				MX6UL_PAD_CSI_DATA05__GPIO4_IO26	0x1a020
+				MX6UL_PAD_CSI_PIXCLK__GPIO4_IO18	0x1a020
+
+				/* MK2 PWM */
+				MX6UL_PAD_LCD_ENABLE__GPIO3_IO01        0x1b020
+				/* MK4 PWM */
+				MX6UL_PAD_LCD_VSYNC__GPIO3_IO03         0x1b020
+
+				/* AN pins are connected to GPIO GPIO as well as
+				 * SPI ADC as these can be used as both on click
+				 * boards. GPIO by default has no pull/keepers
+				 * but enable hysteresis on the input path */
+				/* MK1-4 AN */
+				MX6UL_PAD_CSI_DATA00__GPIO4_IO21	0x10020
+				MX6UL_PAD_JTAG_TMS__GPIO1_IO11		0x10020
+				MX6UL_PAD_CSI_DATA01__GPIO4_IO22	0x10020
+				MX6UL_PAD_CSI_DATA02__GPIO4_IO23	0x10020
+			>;
+		};
+
+		pinctrl_uart2_txen: uart2txen {
+			fsl,pins = <
+				/* TXEN */
+				MX6UL_PAD_UART2_RTS_B__GPIO1_IO23	0x1b020
+			>;
+		};
+
+		pinctrl_uart8: uart8grp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA20__UART8_DCE_TX	0x1b0b1
+				MX6UL_PAD_LCD_DATA21__UART8_DCE_RX	0x1b0b1
+				/* TXEN */
+				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0x1b020
+			>;
+		};
+
+		pinctrl_mk1i2c: mk1i2c {
+			fsl,pins = <
+				/*  0x1a020 == no pull resistor */
+				/* SCL */
+				MX6UL_PAD_LCD_DATA10__GPIO3_IO15	0x1a020
+				/* SDA */
+				MX6UL_PAD_LCD_DATA11__GPIO3_IO16	0x1a020
+			>;
+		};
+
+		pinctrl_mk2i2c: mk2i2c {
+			fsl,pins = <
+				/*  0x1a020 == no pull resistor */
+				/* SCL */
+				MX6UL_PAD_LCD_DATA12__GPIO3_IO17	0x1a020
+				/* SDA */
+				MX6UL_PAD_LCD_DATA13__GPIO3_IO18	0x1a020
+			>;
+		};
+
+		pinctrl_mk3i2c: mk3i2c {
+			fsl,pins = <
+				/*  0x1a020 == no pull resistor */
+				/* SCL */
+				MX6UL_PAD_LCD_DATA14__GPIO3_IO19	0x1a020
+				/* SDA */
+				MX6UL_PAD_LCD_DATA15__GPIO3_IO20	0x1a020
+			>;
+		};
+
+		/* Bus shared between MK1 and MK2 */
+		pinctrl_mk12spi: mk12spi {
+			fsl,pins = <
+				/* 0x1b020 == Hyst., 100k PU, 50 mA drive */
+				/* CLK */
+				MX6UL_PAD_LCD_DATA02__GPIO3_IO07	0x1b020
+				/* MOSI */
+				MX6UL_PAD_LCD_DATA03__GPIO3_IO08	0x1b020
+				/* MISO */
+				MX6UL_PAD_LCD_DATA04__GPIO3_IO09	0x1b020
+				/* MK1 CS# */
+				MX6UL_PAD_LCD_DATA05__GPIO3_IO10	0x1b020
+				/* MK2 CS# */
+				MX6UL_PAD_LCD_DATA06__GPIO3_IO11	0x1b020
+			>;
+		};
+
+		/* Bus shared between MK3 and MK4 */
+		pinctrl_mk34spi: mk34spi {
+			fsl,pins = <
+				/* 0x1b020 == Hyst., 100k PU, 50 mA drive */
+				/* CLK */
+				MX6UL_PAD_CSI_MCLK__GPIO4_IO17		0x1b020
+				/* MOSI */
+				MX6UL_PAD_JTAG_TDI__GPIO1_IO13		0x1b020
+				/* MISO */
+				MX6UL_PAD_JTAG_TDO__GPIO1_IO12		0x1b020
+				/* MK3 CS# */
+				MX6UL_PAD_LCD_DATA07__GPIO3_IO12        0x1b020
+				/* MK4 CS# */
+				MX6UL_PAD_LCD_DATA22__GPIO3_IO27        0x1b020
+			>;
+		};
+	};
+};
