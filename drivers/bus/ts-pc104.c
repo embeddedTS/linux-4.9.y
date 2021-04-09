@@ -39,7 +39,7 @@
  * 
  */
 
-#define PC104_ADDR_SPACE	((1<<19) - 1)
+#define PC104_ADDR_SPACE	((1<<20) - 1)
 
 struct tspc104_bus {
 	struct gpio_desc *gpio_reset;
