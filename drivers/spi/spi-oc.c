@@ -37,6 +37,7 @@
 #define CTRL_LSB	(1 << 11)
 #define CTRL_IE		(1 << 12)
 #define CTRL_ASS	(1 << 13)
+#define CTRL_CPOL	(1 << 14)
 
 
 /**
@@ -222,22 +223,18 @@ static int spioc_setup(struct spi_device *spi)
 	else
 		ctrl &= ~CTRL_LSB;
 
-	/* adapt to clock polarity and phase */
+	ctrl &= ~(CTRL_RXNEG | CTRL_TXNEG | CTRL_CPOL);
 	if (spi->mode & SPI_CPOL) {
 		if (spi->mode & SPI_CPHA) {
-			ctrl |=  CTRL_TXNEG;
-			ctrl &= ~CTRL_RXNEG;
+			ctrl |=  CTRL_RXNEG | CTRL_CPOL; /* Mode 3 */
 		} else {
-			ctrl &= ~CTRL_TXNEG;
-			ctrl |=  CTRL_RXNEG;
+			ctrl |=  CTRL_TXNEG | CTRL_CPOL; /* Mode 2 */
 		}
 	} else {
 		if (spi->mode & SPI_CPHA) {
-			ctrl &= ~CTRL_TXNEG;
-			ctrl |=  CTRL_RXNEG;
+			ctrl |=  CTRL_RXNEG; /* Mode 1 */
 		} else {
-			ctrl |=  CTRL_TXNEG;
-			ctrl &= ~CTRL_RXNEG;
+			ctrl |=  CTRL_TXNEG; /* Mode 0 */
 		}
 	}
 
