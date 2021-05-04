@@ -454,7 +454,7 @@
 				reg = <0 0x00 0x50>;
 
 				interrupt-parent = <&gpio5>;
-				interrupts = <1 IRQ_TYPE_EDGE_RISING>;
+				interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
 				status = "okay";
 			};
 		};
