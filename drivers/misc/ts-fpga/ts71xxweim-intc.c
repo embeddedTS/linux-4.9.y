@@ -108,6 +108,7 @@ static int ts7120_intc_irqdomain_map(struct irq_domain *d,
 				 handle_level_irq);
 
 	irq_clear_status_flags(irq, IRQ_NOREQUEST | IRQ_NOPROBE);
+	irq_set_status_flags(irq, IRQ_LEVEL);
 
 	return 0;
 }
