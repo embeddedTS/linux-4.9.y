@@ -213,7 +213,7 @@ static int spioc_setup(struct spi_device *spi)
 	u32 ctrl = spioc_read(spioc, SPIOC_CTRL);
 
 	/* make sure we're not busy */
-	ctrl &= ~CTRL_BUSY;
+	BUG_ON(ctrl & CTRL_BUSY);
 
 	if (!spi->bits_per_word)
 		spi->bits_per_word = 8;
@@ -280,23 +280,24 @@ static void spioc_cleanup(struct spi_device *spi)
 static irqreturn_t spioc_interrupt(int irq, void *dev_id)
 {
 	struct spioc *spioc = (struct spioc *)dev_id;
+	struct spi_transfer *transfer;
+	size_t rem;
+	u32 ctrl;
 
 	if (!spioc)
 		return IRQ_NONE;
 
-	else {
-		struct spi_transfer *transfer = spioc->transfer;
-		size_t rem;
-		spioc_read(spioc, SPIOC_CTRL);
+	transfer = spioc->transfer;
+	ctrl = spioc_read(spioc, SPIOC_CTRL);
+	BUG_ON(ctrl & CTRL_BUSY);
 
-		/* read data from registers */
-		rem = min_t(size_t, transfer->len - spioc->nx, 16);
-		if (transfer->rx_buf)
-			spioc_copy_rx(spioc, transfer->rx_buf + spioc->nx, rem);
-		spioc->nx += rem;
+	/* read data from registers */
+	rem = min_t(size_t, transfer->len - spioc->nx, 16);
+	if (transfer->rx_buf)
+		spioc_copy_rx(spioc, transfer->rx_buf + spioc->nx, rem);
+	spioc->nx += rem;
 
-		tasklet_schedule(&spioc->process_transfers);
-	}
+	tasklet_schedule(&spioc->process_transfers);
 
 	return IRQ_HANDLED;
 }
