@@ -60,6 +60,8 @@
 		serial15 = &fpga_uart7;
 		serial16 = &fpga_uart8;
 		pc104bus = &pc104bus;
+		spi4 = &opencores_spi0;
+		spi5 = &opencores_spi1;
 	};
 
 	chosen {
@@ -555,6 +557,7 @@
 			};
 		};
 
+		/* DB9 */
 		fpga_uart0: serial@0 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -569,6 +572,7 @@
 			status = "okay";
 		};
 
+		/* COM2 RS-232 */
 		fpga_uart1: serial@10 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -583,6 +587,7 @@
 			status = "okay";
 		};
 
+		/* COM3 RS-232 */
 		fpga_uart2: serial@20 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -597,6 +602,7 @@
 			status = "okay";
 		};
 
+		/* COM2 RS-485 */
 		fpga_uart3: serial@30 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -611,6 +617,7 @@
 			status = "okay";
 		};
 
+		/* COM2 RS-422 */
 		fpga_uart4: serial@40 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -681,7 +688,7 @@
 			status = "okay";
 		};
 
-		opencores_spi0: opencores_spi@0 {
+		opencores_spi0: opencores_spi@100 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			compatible = "opencores,spi-oc";
@@ -691,13 +698,49 @@
 			clocks = <&fpga_clk_weim_bclk>;
 			clock-names = "spi-oc-clk";
 			opencores-spi,idx = <0>;
+			opencores-spi,num-chipselects = <3>;
+			status = "okay";
+
+			spi@0 {
+				compatible = "technologic,spidev";
+				spi-max-frequency = <20000000>;
+				reg = <0>;
+			};
+
+			spifram: spi@1 {
+				compatible = "atmel,at25", "cypress,fm25l16b";
+				reg = <1>;
+				spi-max-frequency = <20000000>;
+				size = <0x800>;
+				address-width = <16>;
+				pagesize = <64>;
+			};
+
+			/* Onboard FPGA Flash */
+			is25lq016b: flash@2 {
+				compatible = "issi,is25lq016b", "jedec,spi-nor";
+				reg = <2>;
+				spi-max-frequency = <20000000>;
+			};
+		};
+
+		opencores_spi1: opencores_spi@120 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			compatible = "opencores,spi-oc";
+			reg = <0x120 32>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <10>;
+			clocks = <&fpga_clk_weim_bclk>;
+			clock-names = "spi-oc-clk";
+			opencores-spi,idx = <0>;
 			opencores-spi,num-chipselects = <1>;
 			status = "okay";
 
-			offboardspi0: offboardspi@0 {
-				compatible = "spidev";
+			spi@0 {
+				compatible = "technologic,spidev";
+				spi-max-frequency = <20000000>;
 				reg = <0>;
-				spi-max-frequency = <1000000>;
 			};
 		};
 
@@ -739,8 +782,6 @@
 				reg = <0x10 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
-				base = <160>;
-				ngpios = <16>;
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				status = "okay";
@@ -769,8 +810,6 @@
 				reg = <0x40 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
-				base = <176>;
-				ngpios = <16>;
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				status = "okay";
@@ -991,8 +1030,6 @@
 				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x1b020 /* EN_SD_CARD_3.3V */
 			>;
 		};
-
-
 
 		pinctrl_dvfs: dvfsgrp {
 			fsl,pins = <
