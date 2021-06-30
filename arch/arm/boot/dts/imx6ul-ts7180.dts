@@ -152,6 +152,15 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 	};
+
+	pps {
+		compatible = "pps-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_ppsgpio>;
+		gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
+
+		status = "okay";
+	};
 };
 
 &cpu0 {
@@ -416,7 +425,7 @@
 &gpio5 {
 	gpio-line-names =
 		"POWER_FAIL",
-		"FPGA_IRQ",
+		"GPS_PPS_OUT",
 		"",
 		"GPIO_DVFS",
 		"",
@@ -688,7 +697,6 @@
 			fsl,pins = <
 				MX6UL_PAD_UART1_CTS_B__GPIO1_IO18 	0x1b020 /* SPARE_1 */
 				MX6UL_PAD_SNVS_TAMPER0__GPIO5_IO00	0x10020 /* POWER_FAIL */
-				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01	0x1b020 /* FPGA_IRQ */
 				MX6UL_PAD_SNVS_TAMPER5__GPIO5_IO05	0x10020 /* SILAB_C2_CLK */
 				MX6UL_PAD_SNVS_TAMPER6__GPIO5_IO06	0x10020 /* SILAB_C2_DAT */
 				MX6UL_PAD_SNVS_TAMPER7__GPIO5_IO07	0x10020 /* SILAB_C2_RESET */
@@ -714,6 +722,12 @@
 				MX6UL_PAD_LCD_DATA06__GPIO3_IO11	0x1b020 /* NO_CHRG_JMP# */
 				MX6UL_PAD_CSI_VSYNC__GPIO4_IO19		0x1b020 /* ID5 */
 				MX6UL_PAD_CSI_HSYNC__GPIO4_IO20		0x03020 /* GYRO_INT */
+			>;
+		};
+
+		pinctrl_ppsgpio: ppsgpio {
+			fsl,pins = <
+				MX6UL_PAD_SNVS_TAMPER1__GPIO5_IO01	0x1a020
 			>;
 		};
 
