@@ -465,6 +465,24 @@
 		gpio-controller;
 		#gpio-cells = <2>;
 		status = "okay";
+
+		gpio-line-names =
+			"ISA_CN_D03",
+			"ISA_CN_D04",
+			"ISA_CN_D05",
+			"ISA_CN_D06",
+			"ISA_CN_D07",
+			"ISA_CN_D08",
+			"ISA_CN_D09",
+			"ISA_CN_D10",
+			"ISA_CN_D11",
+			"ISA_CN_D12",
+			"ISA_CN_D13",
+			"ISA_CN_D14",
+			"ISA_CN_D15",
+			"",
+			"",
+			"";
 	};
 
 	/* ATSHA204@64 */
