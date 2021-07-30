@@ -563,6 +563,27 @@
 	scl-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
 
+        // MAG_N_IRQ into NAND_ALE/SD2_RST#/PWM3 pin B4
+        // as well as the FPGA
+	magnet: magnetometer@1e {
+		compatible = "st,lis2mdl_magn";
+		reg = <0x1e>;
+                // See MX6UL_PAD_NAND_ALE__GPIO4_IO10 for pinmux
+		interrupt-parent = <&gpio4>;
+		interrupts = <10 IRQ_TYPE_LEVEL_HIGH>;
+		status = "okay";
+	};
+
+        // GYRO_INT into CSI_HSYNC pin F3
+	gyro: ism330@6a {
+		compatible = "st,ism330dlc";
+		reg = <0x6a>;
+                // See MX6UL_PAD_CSI_HSYNC__GPIO4_IO20 for pinmux
+		interrupt-parent = <&gpio4>;
+		interrupts = <20 IRQ_TYPE_LEVEL_HIGH>;
+		status = "okay";
+	};
+
 	rtc: m41t00s@68 {
 		compatible = "m41t00";
 		reg = <0x68>;
@@ -706,6 +727,7 @@
 				MX6UL_PAD_LCD_DATA14__GPIO3_IO19	0x1b020 /* NIMBEL_PWR_ON */
 				MX6UL_PAD_LCD_DATA18__GPIO3_IO23	0x1b020 /* ID4 */
 				MX6UL_PAD_LCD_DATA22__GPIO3_IO27	0x1b020 /* ID1 */
+				MX6UL_PAD_NAND_ALE__GPIO4_IO10          0x03020 /* MAG_N_IRQ */
 				MX6UL_PAD_NAND_WP_B__GPIO4_IO11		0x1b020 /* FPGA_RESET# */
 				MX6UL_PAD_LCD_DATA19__GPIO3_IO24	0x1b020 /* JTAG_FPGA_TDO */
 				MX6UL_PAD_LCD_VSYNC__GPIO3_IO03		0x1b020 /* JTAG_FPGA_TDI */
