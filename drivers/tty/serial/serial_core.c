@@ -197,6 +197,7 @@ static int uart_port_startup(struct tty_struct *tty, struct uart_state *state,
 		uart_circ_clear(&state->xmit);
 		uart_port_unlock(uport, flags);
 	} else {
+		uart_circ_clear(&state->xmit);
 		uart_port_unlock(uport, flags);
 		/*
 		 * Do not free() the page under the port lock, see
