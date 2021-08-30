@@ -609,7 +609,7 @@
 			"EN_SD_POWER",
 			"EN_USB_HOST_5V",
 			"EN_OFF_BD_5V",
-			"EN_AUX_PWR",
+			"EN_CELL_MODEM_PWR",
 			"EN_NIMBEL_3.3V",
 			"EN_GPS_PWR#",
 			"EN_CAN_XVR#",
