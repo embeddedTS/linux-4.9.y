@@ -475,15 +475,15 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
 	status = "okay";
-	fsl,uart-has-rtscts;
+	uart-has-rtscts;
 };
 
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
 	status = "okay";
-	fsl,uart-has-rtscts;
-	fsl,uart-tx-enable-gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>; /* SPARE_2 */
+	uart-has-rtscts;
+	rts-gpios = <&gpio1 19 GPIO_ACTIVE_HIGH>; /* EN_485 is the TX enable signal */
 	linux,rs485-enabled-at-boot-time;
 };
 
