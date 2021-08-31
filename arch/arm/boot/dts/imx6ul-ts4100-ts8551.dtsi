@@ -50,9 +50,10 @@
 	uart-has-rtscts;
 	/* gpio 1_18 is initialized by the hog group in 4100.dtsi
 	 * It is the SPARE_1 pin, needs to be set up in FPGA to pass to TXEN
-	 * with the command 'tshwctl --out 0x31 --in 0x2'
+	 * with the command 'tshwctl --out 0x31 --in 0x1'
 	 */
 	rts-gpios = <&gpio1 18 GPIO_ACTIVE_HIGH>;
+	dma-names = "", "";
 	linux,rs485-enabled-at-boot-time;
 };
 
