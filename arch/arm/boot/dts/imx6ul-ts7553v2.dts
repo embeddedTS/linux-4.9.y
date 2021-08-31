@@ -327,6 +327,7 @@
 
 	uart-has-rtscts;
 	rts-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
+	dma-names = "", "";
 	linux,rs485-enabled-at-boot-time;
 };
 
