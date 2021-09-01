@@ -36,7 +36,7 @@
 
 #define TSWEIM_IRQ_STATUS		0x24
 #define TSWEIM_IRQ_MASK			0x48
-#define TSWEIM_NUM_FPGA_IRQ		17
+#define TSWEIM_NUM_FPGA_IRQ		32
 
 static struct tsweim_intc_priv {
 	void __iomem  *syscon;
