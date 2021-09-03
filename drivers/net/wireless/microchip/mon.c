@@ -4,17 +4,14 @@
  * All rights reserved.
  */
 
-#include <linux/etherdevice.h>
+#include "cfg80211.h"
 
-#include "wilc_netdev.h"
-#include "wilc_wfi_cfgoperations.h"
-
-struct wfi_rtap_hdr {
+struct wilc_wfi_radiotap_hdr {
 	struct ieee80211_radiotap_header hdr;
 	u8 rate;
 } __packed;
 
-struct wfi_rtap_cb_hdr {
+struct wilc_wfi_radiotap_cb_hdr {
 	struct ieee80211_radiotap_header hdr;
 	u8 rate;
 	u8 dump;
@@ -26,9 +23,9 @@ struct wfi_rtap_cb_hdr {
 
 void wilc_wfi_handle_monitor_rx(struct wilc *wilc, u8 *buff, u32 size)
 {
-	struct wilc_vif *vif = 0;
+	struct wilc_vif *vif = NULL;
 	struct sk_buff *skb = NULL;
-	struct wfi_rtap_hdr *hdr;
+	struct wilc_wfi_radiotap_hdr *hdr;
 
 	vif = wilc_get_vif_from_type(wilc, WILC_MONITOR_MODE);
 	if (!vif) {
@@ -47,7 +44,7 @@ void wilc_wfi_handle_monitor_rx(struct wilc *wilc, u8 *buff, u32 size)
 	hdr = skb_push(skb, sizeof(*hdr));
 #else
 	memcpy(skb_put(skb, size), buff, size);
-	hdr = (struct wfi_rtap_hdr *)skb_push(skb, sizeof(*hdr));
+	hdr = (struct wilc_wfi_radiotap_hdr *)skb_push(skb, sizeof(*hdr));
 #endif
 	memset(hdr, 0, sizeof(*hdr));
 	hdr->hdr.it_version = 0; /* PKTHDR_RADIOTAP_VERSION; */
@@ -72,8 +69,8 @@ void wilc_wfi_monitor_rx(struct net_device *mon_dev, u8 *buff, u32 size)
 {
 	u32 header, pkt_offset;
 	struct sk_buff *skb = NULL;
-	struct wfi_rtap_hdr *hdr;
-	struct wfi_rtap_cb_hdr *cb_hdr;
+	struct wilc_wfi_radiotap_hdr *hdr;
+	struct wilc_wfi_radiotap_cb_hdr *cb_hdr;
 
 	if (!mon_dev)
 		return;
@@ -90,7 +87,7 @@ void wilc_wfi_monitor_rx(struct net_device *mon_dev, u8 *buff, u32 size)
 	 * The packet offset field contain info about what type of management
 	 * the frame we are dealing with and ack status
 	 */
-	pkt_offset = GET_PKT_OFFSET(header);
+	pkt_offset = FIELD_GET(WILC_PKT_HDR_OFFSET_FIELD, header);
 
 	if (pkt_offset & IS_MANAGMEMENT_CALLBACK) {
 		/* hostapd callback mgmt frame */
@@ -107,7 +104,7 @@ void wilc_wfi_monitor_rx(struct net_device *mon_dev, u8 *buff, u32 size)
 		cb_hdr = skb_push(skb, sizeof(*cb_hdr));
 	#else
 		memcpy(skb_put(skb, size), buff, size);
-		cb_hdr = (struct wfi_rtap_cb_hdr *)skb_push(skb,
+		cb_hdr = (struct wilc_wfi_radiotap_cb_hdr *)skb_push(skb,
 							    sizeof(*cb_hdr));
 	#endif
 		memset(cb_hdr, 0, sizeof(*cb_hdr));
@@ -140,7 +137,7 @@ void wilc_wfi_monitor_rx(struct net_device *mon_dev, u8 *buff, u32 size)
 		hdr = skb_push(skb, sizeof(*hdr));
 	#else
 		memcpy(skb_put(skb, size), buff, size);
-		hdr = (struct wfi_rtap_hdr *)skb_push(skb,
+		hdr = (struct wilc_wfi_radiotap_hdr *)skb_push(skb,
 							       sizeof(*hdr));
 	#endif
 		memset(hdr, 0, sizeof(*hdr));
@@ -217,7 +214,7 @@ static int mon_mgmt_tx(struct net_device *dev, const u8 *buf, size_t len)
 
 	mgmt_tx->size = len;
 
-	txq_add_mgmt_pkt(dev, mgmt_tx, mgmt_tx->buff, mgmt_tx->size,
+	wilc_wlan_txq_add_mgmt_pkt(dev, mgmt_tx, mgmt_tx->buff, mgmt_tx->size,
 				   mgmt_tx_complete);
 
 	netif_wake_queue(dev);
@@ -280,7 +277,7 @@ struct net_device *wilc_wfi_init_mon_interface(struct wilc *wl,
 {
 	struct wilc_wfi_mon_priv *priv;
 
-	/*If monitor interface is already initialized, return it*/
+	/* If monitor interface is already initialized, return it */
 	if (wl->monitor_dev)
 		return wl->monitor_dev;
 
@@ -290,8 +287,7 @@ struct net_device *wilc_wfi_init_mon_interface(struct wilc *wl,
 		return NULL;
 	}
 	wl->monitor_dev->type = ARPHRD_IEEE80211_RADIOTAP;
-	strncpy(wl->monitor_dev->name, name, IFNAMSIZ);
-	wl->monitor_dev->name[IFNAMSIZ - 1] = 0;
+	strlcpy(wl->monitor_dev->name, name, IFNAMSIZ);
 	wl->monitor_dev->netdev_ops = &wilc_wfi_netdev_ops;
 #if KERNEL_VERSION(4, 11, 9) <= LINUX_VERSION_CODE
 	wl->monitor_dev->needs_free_netdev = true;
@@ -300,13 +296,10 @@ struct net_device *wilc_wfi_init_mon_interface(struct wilc *wl,
 #endif
 	if (register_netdevice(wl->monitor_dev)) {
 		PRINT_ER(real_dev, "register_netdevice failed\n");
+		free_netdev(wl->monitor_dev);
 		return NULL;
 	}
 	priv = netdev_priv(wl->monitor_dev);
-	if (!priv) {
-		PRINT_ER(real_dev, "private structure is NULL\n");
-		return NULL;
-	}
 
 	priv->real_ndev = real_dev;
 

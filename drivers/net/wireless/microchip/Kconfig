@@ -1,20 +1,26 @@
 # SPDX-License-Identifier: GPL-2.0
-config WILC
-	tristate
-
-config WLAN_VENDOR_MCHP
+# SPDX-License-Identifier: GPL-2.0
+config WLAN_VENDOR_MICROCHIP
         bool "Microchip devices"
         default y
-	help
-	This adds support for WILC1000 & WILC3000 chips which support
-	IEEE 802.11n WiFi. WILC3000 is a WiFi-BT combo chip.
+        help
+        If you have a wireless card belonging to this class, say Y.
 
-if WLAN_VENDOR_MCHP
+        Note that the answer to this question doesn't directly affect the
+        kernel: saying N will just cause the configurator to skip all the
+        questions about these cards. If you say Y, you will be asked for
+        your specific card in the following questions.
+
+if WLAN_VENDOR_MICROCHIP
+
+config WILC
+	tristate
 
 config WILC_SDIO
 	tristate "WILC SDIO"
 	depends on CFG80211 && INET && MMC
 	select WILC
+	select PWRSEQ_WILC
 	help
 	  This module adds support for the SDIO interface of adapters using
 	  WILC1000 & WILC3000 chipset. The Atmel WILC1000 SDIO is a full speed interface.
@@ -30,6 +36,9 @@ config WILC_SPI
 	tristate "WILC SPI"
 	depends on CFG80211 && INET && SPI
 	select WILC
+	select PWRSEQ_WILC
+	select CRC7
+	select CRC_ITU_T
 	help
 	  This module adds support for the SPI interface of adapters using
 	  WILC1000 & WILC3000 chipset. The Atmel WILC1000 has a Serial Peripheral
@@ -50,4 +59,5 @@ config WILC_HW_OOB_INTR
 	  interrupt mechanism for SDIO host controllers that don't support SDIO
 	  interrupt. Select this option If the SDIO host controller in your
 	  platform doesn't support SDIO time devision interrupt.
-endif
+
+endif # WLAN_VENDOR_MICROCHIP

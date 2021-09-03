@@ -49,15 +49,17 @@
 	status = "okay";
 
 	wilc_spi@0 {
-		compatible = "microchip,wilc3000";
+		compatible = "microchip,wilc1000", "microchip,wilc3000";
 		reg = <0>;
 		spi-max-frequency = <48000000>;
 		/* These are in FPGA! */
-		reset-gpios = <&gpio7 7 GPIO_ACTIVE_HIGH>; /* low? */
+		reset-gpios = <&gpio7 7 GPIO_ACTIVE_HIGH>;
 		chip_en-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
-		irq-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <11 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
+
 };
 
 &usbotg1 {

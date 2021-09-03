@@ -261,12 +261,13 @@
 	status = "okay";
 
 	wilc_spi@0 {
-		compatible = "microchip,wilc3000";
+		compatible = "microchip,wilc1000", "microchip,wilc3000";
 		reg = <0>;
 		spi-max-frequency = <48000000>;
 		reset-gpios = <&gpio4 10 0>;     /* RESET,  GPIO 106 */
 		chip_en-gpios = <&gpio4 26 0>;   /* ENABLE, GPIO 122 */
-		irq-gpios = <&gpio5 01 0>;       /* IRQ,    GPIO 129 */
+		interrupt-parent = <&gpio5>;     /* IRQ,    GPIO 129 */
+		interrupts = <1 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 };
@@ -326,6 +327,7 @@
 
 	uart-has-rtscts;
 	rts-gpios = <&gpio1 22 GPIO_ACTIVE_LOW>;
+	dma-names = "", "";
 	linux,rs485-enabled-at-boot-time;
 };
 
