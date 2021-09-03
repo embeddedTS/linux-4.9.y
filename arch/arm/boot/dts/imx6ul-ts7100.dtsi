@@ -315,6 +315,63 @@
 			};
 		};
 
+		syscon: syscon@4000 {
+			compatible = "simple-bus";
+			#address-cells = <0x2>;
+			#size-cells = <0x1>;
+			reg = <0x4000 0x58>;
+			ranges = <0 0 0x4000 0x58>;
+			status = "okay";
+
+			gpio6: fpga_gpio6@10 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0 0x10 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				base = <160>;
+				ngpios = <16>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+			};
+
+			gpio7: fpga_gpio7@40 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0 0x40 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				base = <176>;
+				ngpios = <16>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+			};
+
+			gpio8: fpga_gpio8@50 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0 0x50 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				base = <192>;
+				ngpios = <16>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+			};
+
+			fpga_intc: fpga_intc@0 {
+				compatible = "technologic,ts71xxweim-intc";
+
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				reg = <0 0x00 0x50>;
+
+				interrupt-parent = <&gpio5>;
+				interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
+				status = "okay";
+			};
+		};
+
 		fpga_uart0: serial@0 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -398,64 +455,6 @@
 				ti,y-plate-ohms = /bits/ 16 <584>;
 				ti,pressure-min = /bits/ 16 <300>;
 				linux,wakeup;
-			};
-		};
-
-
-		syscon: syscon@4000 {
-			compatible = "simple-bus";
-			#address-cells = <0x2>;
-			#size-cells = <0x1>;
-			reg = <0x4000 0x58>;
-			ranges = <0 0 0x4000 0x58>;
-			status = "okay";
-
-			gpio6: fpga_gpio6@10 {
-				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0x10 0x08>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				base = <160>;
-				ngpios = <16>;
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				status = "okay";
-			};
-
-			gpio7: fpga_gpio7@40 {
-				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0x40 0x08>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				base = <176>;
-				ngpios = <16>;
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				status = "okay";
-			};
-
-			gpio8: fpga_gpio8@50 {
-				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0 0x50 0x08>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				base = <192>;
-				ngpios = <16>;
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				status = "okay";
-			};
-
-			fpga_intc: fpga_intc@0 {
-				compatible = "technologic,ts71xxweim-intc";
-
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				reg = <0 0x00 0x50>;
-
-				interrupt-parent = <&gpio5>;
-				interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
-				status = "okay";
 			};
 		};
 	 };
