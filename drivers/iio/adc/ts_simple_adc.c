@@ -26,9 +26,6 @@
 #include <linux/iio/iio.h>
 #include <linux/iio/buffer.h>
 #include <linux/iio/kfifo_buf.h>
-#include <linux/iio/trigger.h>
-#include <linux/iio/trigger_consumer.h>
-#include <linux/iio/triggered_buffer.h>
 
 /*
  * Core is 4 bytes wide in total.
@@ -76,6 +73,12 @@ static const struct iio_chan_spec ts_simple_adc_iio_channels[] = {
 	IIO_CHAN_SOFT_TIMESTAMP(1),
 };
 
+void ts_simple_adc_set_standby(struct ts_simple_adc *adc, int en_standby)
+{
+	if(en_standby) writew(TS_ADC_FLAGS_STANDBY, adc->base + TS_ADC_FLAGS);
+	else writew(0x0, adc->base + TS_ADC_FLAGS);
+}
+
 static int ts_simple_adc_iio_read_raw(struct iio_dev *iio_dev,
 			struct iio_chan_spec const *chan, int *val,
 			int *val2, long mask)
@@ -87,6 +90,7 @@ static int ts_simple_adc_iio_read_raw(struct iio_dev *iio_dev,
 	case IIO_CHAN_INFO_RAW:
 		if (iio_buffer_enabled(iio_dev))
 			return -EBUSY;
+		ts_simple_adc_set_standby(adc, 0);
 		reinit_completion(&adc->completion);
 		ret = wait_for_completion_interruptible_timeout(&adc->completion,
 								ADC_TIMEOUT_US);
@@ -94,6 +98,7 @@ static int ts_simple_adc_iio_read_raw(struct iio_dev *iio_dev,
 			return -ETIMEDOUT;
 
 		*val = adc->value;
+		ts_simple_adc_set_standby(adc, 1);
 		return IIO_VAL_INT;
 	case IIO_CHAN_INFO_SCALE:
 		*val = 6600;
@@ -128,8 +133,25 @@ static const struct iio_info ts_simple_adc_info = {
 	.driver_module = THIS_MODULE,
 };
 
-static const struct iio_trigger_ops simple_adc_trigger_ops = {
-	.owner = THIS_MODULE,
+static int ts_simple_adc_buffer_enable(struct iio_dev *indio_dev)
+{
+	struct ts_simple_adc *adc = iio_priv(indio_dev);
+
+	ts_simple_adc_set_standby(adc, 0);
+	return 0;
+}
+
+static int ts_simple_adc_buffer_disable(struct iio_dev *indio_dev)
+{
+	struct ts_simple_adc *adc = iio_priv(indio_dev);
+
+	ts_simple_adc_set_standby(adc, 1);
+	return 0;
+}
+
+static const struct iio_buffer_setup_ops ts_simple_setup_ops = {
+	.postenable = &ts_simple_adc_buffer_enable,
+	.predisable = &ts_simple_adc_buffer_disable,
 };
 
 static int ts_simple_adc_probe(struct platform_device *pdev)
@@ -154,6 +176,7 @@ static int ts_simple_adc_probe(struct platform_device *pdev)
 	indio_dev->modes = INDIO_BUFFER_SOFTWARE;
 	indio_dev->channels = ts_simple_adc_iio_channels;
 	indio_dev->num_channels = ARRAY_SIZE(ts_simple_adc_iio_channels);
+	indio_dev->setup_ops = &ts_simple_setup_ops;
 
 	irq = platform_get_irq(pdev, 0);
 	if (irq < 0) {
