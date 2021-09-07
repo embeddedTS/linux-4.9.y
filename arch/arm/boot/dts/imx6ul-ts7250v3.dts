@@ -852,6 +852,14 @@
 				reg = <0>;
 			};
 		};
+
+		mikro_adc0: mikro_adc@180 {
+			compatible = "technologic,ts-simple-adc";
+			reg = <0x180 4>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <19>;
+			status = "okay";
+		};
 	 };
 };
 
