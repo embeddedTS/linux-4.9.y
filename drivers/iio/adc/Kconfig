@@ -525,6 +525,19 @@ config TI_AM335X_ADC
 	  To compile this driver as a module, choose M here: the module will be
 	  called ti_am335x_adc.
 
+config TS_SIMPLEADC
+	tristate "Technologic Systems simple FPGA ADC"
+	depends on OF
+	depends on HAS_IOMEM
+	select IIO_BUFFER
+	select IIO_KFIFO_BUF
+	help
+	  Say yes here to build support for Technologic systems FPGA based ADC.
+
+	  To compile this driver as a module, choose M here: the module will be
+	  called ts_simple_adc.
+
+
 config TWL4030_MADC
 	tristate "TWL4030 MADC (Monitoring A/D Converter)"
 	depends on TWL4030_CORE

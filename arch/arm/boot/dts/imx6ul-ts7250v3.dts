@@ -576,6 +576,96 @@
 			};
 		};
 
+		syscon: syscon@4000 {
+			compatible = "simple-bus";
+			#address-cells = <0x1>;
+			#size-cells = <0x1>;
+			reg = <0x4000 0x58>;
+			ranges = <0 0x4000 0x58>;
+			status = "okay";
+
+			fpga_intc: fpga_intc@0 {
+				compatible = "technologic,ts71xxweim-intc";
+				reg = <0x0 0x50>;
+
+				interrupt-controller;
+				#interrupt-cells = <1>;
+
+				interrupt-parent = <&gpio5>;
+				interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
+				status = "okay";
+			};
+
+			pc104bus: fpgaisa@50 {
+				compatible = "technologic,pc104-bus";
+				reg = <0x50 0x4>;
+
+				ranges = <0 0 0x1000>;
+				reset-gpio = <&gpio3 7 0>;
+
+				#address-cells = <0x1>;
+				#size-cells = <0x1>;
+
+				status = "okay";
+			};
+
+			gpio6: fpga_gpio6@10 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0x10 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+
+				gpio-line-names =
+					"",
+					"DIO_PIN1",
+					"DIO_PIN3",
+					"DIO_PIN5",
+					"DIO_PIN7",
+					"DIO_PIN8",
+					"DIO_PIN9",
+					"DIO_PIN11",
+					"DIO_PIN13",
+					"DIO_PIN15",
+					"DIO_SPI_MISO",
+					"DIO_SPI_CS#",
+					"SILAB_CLK",
+					"SILAB_DAT",
+					"",
+					"";
+			};
+
+			gpio7: fpga_gpio7@40 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0x40 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+
+				gpio-line-names =
+					"MIKRO_RESET#",
+					"ISA_BALE",
+					"ISA_TC",
+					"ISA_ENDX",
+					"EN_NIMBEL_3V3",
+					"ISA_IORDY",
+					"ISA_REFRESH",
+					"ISA_DRQ1",
+					"ISA_DACK1",
+					"ISA_DRQ2",
+					"ISA_DACK2",
+					"EN_NIMBEL_4V",
+					"ISA_DRQ3",
+					"ISA_DACK3",
+					"",
+					"";
+			};
+		};
+
 		/* DB9 */
 		fpga_uart0: serial@0 {
 			compatible = "ns16550a";
@@ -763,94 +853,12 @@
 			};
 		};
 
-		syscon: syscon@4000 {
-			compatible = "simple-bus";
-			#address-cells = <0x1>;
-			#size-cells = <0x1>;
-			reg = <0x4000 0x58>;
-			ranges = <0 0x4000 0x58>;
+		mikro_adc0: mikro_adc@180 {
+			compatible = "technologic,ts-simple-adc";
+			reg = <0x180 4>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <19>;
 			status = "okay";
-
-			fpga_intc: fpga_intc@0 {
-				compatible = "technologic,ts71xxweim-intc";
-				reg = <0x0 0x50>;
-
-				interrupt-controller;
-				#interrupt-cells = <1>;
-
-				interrupt-parent = <&gpio5>;
-				interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
-				status = "okay";
-			};
-
-			pc104bus: fpgaisa@50 {
-				compatible = "technologic,pc104-bus";
-				reg = <0x50 0x4>;
-
-				ranges = <0 0 0x1000>;
-				reset-gpio = <&gpio3 7 0>;
-
-				#address-cells = <0x1>;
-				#size-cells = <0x1>;
-
-				status = "okay";
-			};
-
-			gpio6: fpga_gpio6@10 {
-				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0x10 0x08>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				status = "okay";
-
-				gpio-line-names =
-					"",
-					"DIO_PIN1",
-					"DIO_PIN3",
-					"DIO_PIN5",
-					"DIO_PIN7",
-					"DIO_PIN8",
-					"DIO_PIN9",
-					"DIO_PIN11",
-					"DIO_PIN13",
-					"DIO_PIN15",
-					"DIO_SPI_MISO",
-					"DIO_SPI_CS#",
-					"SILAB_CLK",
-					"SILAB_DAT",
-					"",
-					"";
-			};
-
-			gpio7: fpga_gpio7@40 {
-				compatible = "technologic,ts71xxweim-gpio";
-				reg = <0x40 0x08>;
-				gpio-controller;
-				#gpio-cells = <2>;
-				interrupt-controller;
-				#interrupt-cells = <1>;
-				status = "okay";
-
-				gpio-line-names =
-					"MIKRO_RESET#",
-					"ISA_BALE",
-					"ISA_TC",
-					"ISA_ENDX",
-					"EN_NIMBEL_3V3",
-					"ISA_IORDY",
-					"ISA_REFRESH",
-					"ISA_DRQ1",
-					"ISA_DACK1",
-					"ISA_DRQ2",
-					"ISA_DACK2",
-					"EN_NIMBEL_4V",
-					"ISA_DRQ3",
-					"ISA_DACK3",
-					"",
-					"";
-			};
 		};
 	 };
 };

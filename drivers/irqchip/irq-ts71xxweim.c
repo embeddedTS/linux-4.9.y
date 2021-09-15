@@ -1,22 +1,5 @@
-/*
- *  Driver for TS-7120 FPGA interrupt-controller
- *
- *  Copyright (C) 2019 Technologic Systems Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+// SPDX-License-Identifier: GPL-2.0
+
 #include <linux/types.h>
 #include <linux/module.h>
 #include <linux/irq.h>
@@ -24,19 +7,9 @@
 #include <linux/irqdomain.h>
 #include <linux/of_device.h>
 
-
-/**
-	This driver is essentially an irq_chip, chained to the interrupt
-	referenced in the device-tree node (gpio5 #1 on the TS-7120).
-	When loaded, a new irq domain named 'fpga_int' is created, with
-	several new interrupt numbers.  These interrupts are then available
-	for the FPGA's various peripherals (such as uarts etc).
-*/
-
-
-#define TSWEIM_IRQ_STATUS		0x24
-#define TSWEIM_IRQ_MASK			0x48
-#define TSWEIM_NUM_FPGA_IRQ		17
+#define TSWEIM_IRQ_STATUS	0x24
+#define TSWEIM_IRQ_MASK		0x48
+#define TSWEIM_NUM_FPGA_IRQ	32
 
 static struct tsweim_intc_priv {
 	void __iomem  *syscon;
@@ -46,24 +19,20 @@ static struct tsweim_intc_priv {
 } priv;
 
 static const struct of_device_id tsweim_intc_of_match_table[] = {
-	{
-		.compatible = "technologic,TS7120-intc",
-		.compatible = "technologic,ts71xxweim-intc",
-	},
-
-	{ /* sentinel */ },
+	{.compatible = "technologic,ts71xxweim-intc", },
+	{},
 };
 MODULE_DEVICE_TABLE(of, tsweim_intc_of_match_table);
 
 static void ts7120_intc_mask(struct irq_data *d)
 {
-	priv.mask = readl(priv.syscon + TSWEIM_IRQ_MASK) & ~BIT(d->hwirq) ;
+	priv.mask = readl(priv.syscon + TSWEIM_IRQ_MASK) & ~BIT(d->hwirq);
 	writel(priv.mask, priv.syscon + TSWEIM_IRQ_MASK);
 }
 
 static void ts7120_intc_unmask(struct irq_data *d)
 {
-	priv.mask = readl(priv.syscon + TSWEIM_IRQ_MASK) | BIT(d->hwirq) ;
+	priv.mask = readl(priv.syscon + TSWEIM_IRQ_MASK) | BIT(d->hwirq);
 	writel(priv.mask, priv.syscon + TSWEIM_IRQ_MASK);
 }
 
@@ -74,9 +43,6 @@ static void ts7120_irq_handler(struct irq_desc *desc)
 	unsigned int status;
 
 	chained_irq_enter(chip, desc);
-
-	/* XXX: This might be easier to implement with a call to
-	 * for_each_set_bit() rather than this style of loop. */
 
 	while ((status =
 	  (priv.mask & readl(priv.syscon + TSWEIM_IRQ_STATUS)))) {
@@ -100,7 +66,6 @@ static struct irq_chip ts7120_irq_chip = {
 	.irq_unmask	= ts7120_intc_unmask,
 };
 
-
 static int ts7120_intc_irqdomain_map(struct irq_domain *d,
 		unsigned int irq, irq_hw_number_t hwirq)
 {
@@ -113,10 +78,9 @@ static int ts7120_intc_irqdomain_map(struct irq_domain *d,
 	return 0;
 }
 
-static struct irq_domain_ops ts7120_intc_irqdomain_ops = {
+static const struct irq_domain_ops ts7120_intc_irqdomain_ops = {
 	.map = ts7120_intc_irqdomain_map,
 };
-
 
 static int tsweim_intc_probe(struct platform_device *pdev)
 {
@@ -142,7 +106,7 @@ static int tsweim_intc_probe(struct platform_device *pdev)
 
 	if (IS_ERR(membase)) {
 		pr_err("Could not map resource\n");
-		return -ENOMEM;;
+		return -ENOMEM;
 	}
 
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
@@ -176,10 +140,11 @@ static int tsweim_intc_remove(struct platform_device *pdev)
 {
 	if (priv.irqdomain) {
 		int i, irq;
-		for(i=0; i < TSWEIM_NUM_FPGA_IRQ; i++) {
-			if ((irq = irq_find_mapping(priv.irqdomain, i)) > 0) {
+
+		for (i = 0; i < TSWEIM_NUM_FPGA_IRQ; i++) {
+			irq = irq_find_mapping(priv.irqdomain, i);
+			if (irq > 0)
 				irq_dispose_mapping(irq);
-			}
 		}
 		irq_domain_remove(priv.irqdomain);
 		priv.irqdomain = NULL;
@@ -187,7 +152,6 @@ static int tsweim_intc_remove(struct platform_device *pdev)
 
 	return 0;
 }
-
 
 static struct platform_driver tsweim_intc_driver = {
 	.driver = {
