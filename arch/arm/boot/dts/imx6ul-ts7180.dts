@@ -134,24 +134,20 @@
 		};
 	};
 
-	i2c_gpio@0 {
-		compatible = "i2c-gpio";
-		clock-frequency = <100000>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_i2c_gpio>;
-
+        i2c_gpio@0 {
+	        compatible = "i2c-gpio";
+	        clock-frequency = <100000>;
+	        pinctrl-names = "default";
+	        pinctrl-0 = <&pinctrl_i2c_gpio>;
 		gpios = <
-			&gpio3 9 GPIO_ACTIVE_LOW /* I2C_DAT on HD1 pin 9*/
-			&gpio3 8 GPIO_ACTIVE_LOW /* I2C_CLK on HD1 pin 14 */
+			&gpio3 9 GPIO_ACTIVE_HIGH /* I2C_DAT on HD12 pin 1 */
+			&gpio3 8 GPIO_ACTIVE_HIGH /* I2C_CLK on HD12 pin 6 */
 			>;
-
-		status = "okay";
-		i2c-gpio,sda-open-drain;
-		i2c-gpio,scl-open-drain;
+	        status = "okay";
 		i2c-gpio,delay-us = <2>;	/* ~100 kHz */
-		#address-cells = <1>;
-		#size-cells = <0>;
-	};
+	        #address-cells = <1>;
+	        #size-cells = <0>;
+        };
 
 	pps {
 		compatible = "pps-gpio";
@@ -901,8 +897,8 @@
 
 		pinctrl_i2c_gpio: i2cgrpgpio {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA03__GPIO3_IO08 0x4001b8b0	/* HD1_I2C_CLK */
-				MX6UL_PAD_LCD_DATA04__GPIO3_IO09 0x4001b8b0 /* HD1_I2C_DAT */
+				MX6UL_PAD_LCD_DATA03__GPIO3_IO08 0x000108b0	/* HD12_I2C_CLK */
+				MX6UL_PAD_LCD_DATA04__GPIO3_IO09 0x000108b0	/* HD12_I2C_DAT */
 			>;
 		};
 
