@@ -38,7 +38,7 @@
 #define CTRL_IE		(1 << 12)
 #define CTRL_ASS	(1 << 13)
 #define CTRL_CPOL	(1 << 14)
-
+#define CTRL_CPHA	(1 << 15)
 
 /**
  * struct spioc - driver-specific context information
@@ -223,19 +223,18 @@ static int spioc_setup(struct spi_device *spi)
 	else
 		ctrl &= ~CTRL_LSB;
 
-	ctrl &= ~(CTRL_RXNEG | CTRL_TXNEG | CTRL_CPOL);
-	if (spi->mode & SPI_CPOL) {
-		if (spi->mode & SPI_CPHA) {
-			ctrl |=  CTRL_RXNEG | CTRL_CPOL; /* Mode 3 */
-		} else {
-			ctrl |=  CTRL_TXNEG | CTRL_CPOL; /* Mode 2 */
-		}
+	ctrl &= ~(CTRL_RXNEG | CTRL_TXNEG | CTRL_CPOL | CTRL_CPHA);
+	if (spi->mode & SPI_CPOL)
+		ctrl |= CTRL_CPOL;
+	if (spi->mode & SPI_CPHA)
+		ctrl |= CTRL_CPHA;
+
+	/* used on older versions of the controller without cpol/cpha, ignored
+	 * on newer controllers */
+	if (spi->mode & SPI_CPHA) {
+		ctrl |= CTRL_RXNEG;
 	} else {
-		if (spi->mode & SPI_CPHA) {
-			ctrl |=  CTRL_RXNEG; /* Mode 1 */
-		} else {
-			ctrl |=  CTRL_TXNEG; /* Mode 0 */
-		}
+		ctrl |= CTRL_TXNEG;
 	}
 
 	/* set the clock divider */
