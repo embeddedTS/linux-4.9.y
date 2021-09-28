@@ -579,7 +579,7 @@
 			fpga_clk_weim_bclk: fpga_clk_weim_bclk {
 				#clock-cells = <0>;
 				compatible = "fixed-clock";
-				clock-frequency = <99000000>;
+				clock-frequency = <79200000>;
 			};
 		};
 
