@@ -50,8 +50,7 @@
 	aliases {
 		ethernet0 = &fec1;
 		ethernet1 = &fec2;
-		serial8 = &fpga_uart0;
-		serial9 = &fpga_uart1;
+		pc104bus = &pc104bus;
 		serial10 = &fpga_uart2;
 		serial11 = &fpga_uart3;
 		serial12 = &fpga_uart4;
@@ -59,9 +58,17 @@
 		serial14 = &fpga_uart6;
 		serial15 = &fpga_uart7;
 		serial16 = &fpga_uart8;
-		pc104bus = &pc104bus;
+		serial8 = &fpga_uart0;
+		serial9 = &fpga_uart1;
 		spi4 = &opencores_spi0;
 		spi5 = &opencores_spi1;
+                gpio10 = &fpga_bank5;
+                gpio11 = &pc104gpio;
+                gpio5 = &fpga_bank0;
+                gpio6 = &fpga_bank1;
+                gpio7 = &fpga_bank2;
+                gpio8 = &fpga_bank3;
+                gpio9 = &fpga_bank4;
 	};
 
 	chosen {
@@ -580,8 +587,8 @@
 			compatible = "simple-bus";
 			#address-cells = <0x1>;
 			#size-cells = <0x1>;
-			reg = <0x4000 0x58>;
-			ranges = <0 0x4000 0x58>;
+			reg = <0x4000 0x100>;
+			ranges = <0 0x4000 0x100>;
 			status = "okay";
 
 			fpga_intc: fpga_intc@0 {
@@ -609,7 +616,7 @@
 				status = "okay";
 			};
 
-			gpio6: fpga_gpio6@10 {
+			fpga_bank0: fpga_gpio@10 {
 				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x10 0x08>;
 				gpio-controller;
@@ -637,7 +644,7 @@
 					"";
 			};
 
-			gpio7: fpga_gpio7@40 {
+			fpga_bank1: fpga_gpio@40 {
 				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x40 0x08>;
 				gpio-controller;
@@ -647,7 +654,7 @@
 				status = "okay";
 
 				gpio-line-names =
-					"MIKRO_RESET#",
+					"ISA_AEN",
 					"ISA_BALE",
 					"ISA_TC",
 					"ISA_ENDX",
@@ -661,6 +668,118 @@
 					"EN_NIMBEL_4V",
 					"ISA_DRQ3",
 					"ISA_DACK3",
+					"",
+					"EN_RS422";
+			};
+
+			fpga_bank2: fpga_gpio@54 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0x54 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+
+				gpio-line-names =
+					"MIKRO_RESET#",
+					"MIKRO_AN",
+					"MIKRO_INT",
+					"MIKRO_180",
+					"MIKRO_PWM",
+					"MIKRO_SPI_CS#",
+					"MIKRO_SPI_CLK",
+					"MIKRO_SPI_MISO",
+					"MIKRO_SPI_MOSI",
+					"MIKRO_TXD",
+					"MIKRO_RXD",
+					"MIKRO_I2C_DAT",
+					"MIKRO_I2C_CLK",
+					"",
+					"",
+					"";
+			};
+
+			fpga_bank3: fpga_gpio@5c {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0x5c 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+
+				gpio-line-names =
+					"ISA_DAT00",
+					"ISA_DAT01",
+					"ISA_DAT02",
+					"ISA_DAT03",
+					"ISA_DAT04",
+					"ISA_DAT05",
+					"ISA_DAT06",
+					"ISA_DAT07",
+					"ISA_DAT08",
+					"ISA_DAT09",
+					"ISA_DAT10",
+					"ISA_DAT11",
+					"ISA_DAT12",
+					"ISA_DAT13",
+					"ISA_DAT14",
+					"ISA_DAT15";
+			};
+
+			fpga_bank4: fpga_gpio@64 {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0x64 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+
+				gpio-line-names =
+					"ISA_ADD_00",
+					"ISA_ADD_01",
+					"ISA_ADD_02",
+					"ISA_ADD_03",
+					"ISA_ADD_04",
+					"ISA_ADD_05",
+					"ISA_ADD_06",
+					"ISA_ADD_07",
+					"ISA_ADD_08",
+					"ISA_ADD_09",
+					"ISA_ADD_10",
+					"ISA_ADD_11",
+					"ISA_ADD_12",
+					"ISA_ADD_13",
+					"ISA_ADD_14",
+					"ISA_ADD_15";
+			};
+
+			fpga_bank5: fpga_gpio@6c {
+				compatible = "technologic,ts71xxweim-gpio";
+				reg = <0x6c 0x08>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupt-controller;
+				#interrupt-cells = <1>;
+				status = "okay";
+
+				gpio-line-names =
+					"ISA_ADD_16",
+					"ISA_ADD_17",
+					"ISA_ADD_18",
+					"ISA_ADD_19",
+					"ISA_IOR",
+					"ISA_IOW",
+					"ISA_MEMR",
+					"ISA_MEMW",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
 					"",
 					"";
 			};
@@ -812,24 +931,27 @@
 
 			spi@0 {
 				compatible = "technologic,spidev";
-				spi-max-frequency = <20000000>;
+				spi-max-frequency = <19800000>;
 				reg = <0>;
+				status = "okay";
 			};
 
 			spifram: spi@1 {
 				compatible = "atmel,at25", "cypress,fm25l16b";
 				reg = <1>;
-				spi-max-frequency = <20000000>;
+				spi-max-frequency = <19800000>;
 				size = <0x800>;
 				address-width = <16>;
 				pagesize = <64>;
+				status = "okay";
 			};
 
 			/* Onboard FPGA Flash */
 			is25lq016b: flash@2 {
 				compatible = "issi,is25lq016b", "jedec,spi-nor";
 				reg = <2>;
-				spi-max-frequency = <20000000>;
+				spi-max-frequency = <19800000>;
+				status = "okay";
 			};
 		};
 
@@ -848,8 +970,9 @@
 
 			spi@0 {
 				compatible = "technologic,spidev";
-				spi-max-frequency = <20000000>;
+				spi-max-frequency = <19800000>;
 				reg = <0>;
+				status = "okay";
 			};
 		};
 
