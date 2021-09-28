@@ -983,6 +983,18 @@
 			interrupts = <19>;
 			status = "okay";
 		};
+
+		mikro_i2c: mikro_i2c@188 {
+			compatible = "opencores,i2c-ocores";
+			reg = <0x188 16>;
+			interrupt-parent = <&fpga_intc>;
+			interrupts = <20>;
+			clocks = <&fpga_clk_weim_bclk>;
+			clock-names = "i2c-oc-clk";
+			reg-io-width = <1>;
+			reg-shift = <1>;
+			status = "okay";
+		};
 	 };
 };
 
