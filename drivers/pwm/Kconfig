@@ -444,6 +444,14 @@ config  PWM_TIPWMSS
 	  PWM submodules require PWM config space access from submodule
 	  drivers and require common parent driver support.
 
+config PWM_TS
+	tristate "TS FPGA PWM support"
+	help
+	  PWM driver support for Technologic Systems FPGA based PWM controller
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called pwm-ts.
+
 config PWM_TWL
 	tristate "TWL4030/6030 PWM support"
 	depends on TWL4030_CORE
