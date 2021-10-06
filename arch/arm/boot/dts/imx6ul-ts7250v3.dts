@@ -995,6 +995,14 @@
 			reg-shift = <1>;
 			status = "okay";
 		};
+
+		mikro_pwm: mikro_pwm@1a8 {
+			compatible = "technologic,pwm";
+			reg = <0x1a8 8>;
+			clocks = <&fpga_clk_weim_bclk>;
+			clock-names = "pwm-input-clk";
+			status = "okay";
+		};
 	 };
 };
 
