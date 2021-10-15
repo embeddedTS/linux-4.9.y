@@ -51,24 +51,21 @@
 		ethernet0 = &fec1;
 		ethernet1 = &fec2;
 		pc104bus = &pc104bus;
+		serial8 = &fpga_uart0;
+		serial9 = &fpga_uart1;
 		serial10 = &fpga_uart2;
 		serial11 = &fpga_uart3;
 		serial12 = &fpga_uart4;
 		serial13 = &fpga_uart5;
-		serial14 = &fpga_uart6;
-		serial15 = &fpga_uart7;
-		serial16 = &fpga_uart8;
-		serial8 = &fpga_uart0;
-		serial9 = &fpga_uart1;
 		spi4 = &opencores_spi0;
 		spi5 = &opencores_spi1;
-                gpio10 = &fpga_bank5;
-                gpio11 = &pc104gpio;
-                gpio5 = &fpga_bank0;
-                gpio6 = &fpga_bank1;
-                gpio7 = &fpga_bank2;
-                gpio8 = &fpga_bank3;
-                gpio9 = &fpga_bank4;
+		gpio5 = &fpga_bank0;
+		gpio6 = &fpga_bank1;
+		gpio7 = &fpga_bank2;
+		gpio8 = &fpga_bank3;
+		gpio9 = &fpga_bank4;
+		gpio10 = &fpga_bank5;
+		gpio11 = &pc104gpio;
 	};
 
 	chosen {
@@ -128,14 +125,14 @@
 			states = <1300000 0x1 1400000 0x0>;
 		};
 
-		reg_3v3: rev_3v3@0 {
+		reg_3v3: rev_3v3 {
 			compatible = "regulator-fixed";
 			regulator-name = "reg-3v3";
 			regulator-min-microvolt = <3300000>;
 			regulator-max-microvolt = <3300000>;
 		};
 
-		vref_adc_2v5: adc@0 {
+		vref_adc_2v5: adc {
 			compatible = "regulator-fixed";
 			regulator-name = "vref-adc";
 			regulator-min-microvolt = <2500000>;
@@ -161,11 +158,14 @@
 		status = "okay";
 	};
 
-	gyro: ism1330@6a {
-		compatible = "st,ism330dlc";
-		reg = <0x6a>;
-		interrupt-parent = <&gpio5>;
-		interrupts = <0 IRQ_TYPE_EDGE_RISING>;
+	silabs: silabs@54 {
+		compatible = "technologic,ts7100-wdt";
+		/* 5min timeout default, in case of slow userspace.
+		 * Set to 0 to disable WDT at startup. Userspace procs
+		 * can still start feeding later.
+		 */
+		timeout-sec = <300>;
+		reg = <0x54>;
 		status = "okay";
 	};
 
@@ -175,14 +175,11 @@
 		status = "okay";
 	};
 
-	silabs: silabs@54 {
-		compatible = "technologic,ts7100-wdt";
-		/* 5min timeout default, in case of slow userspace.
-		 * Set to 0 to disable WDT at startup. Userspace procs
-		 * can still start feeding later.
-		 */
-		timeout-sec = <300>;
-		reg = <0x54>;
+	gyro: ism1330@6a {
+		compatible = "st,ism330dlc";
+		reg = <0x6a>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <0 IRQ_TYPE_EDGE_RISING>;
 		status = "okay";
 	};
 };
@@ -222,7 +219,7 @@
 	status = "okay";
 
 	wilc_spi@0 {
-		compatible = "microchip,wilc1000", "microchip,wilc3000";
+		compatible = "microchip,wilc3000", "microchip,wilc1000";
 		reg = <0>;
 		spi-max-frequency = <48000000>;
 		reset-gpios = <&gpio5 5 GPIO_ACTIVE_HIGH>;
@@ -566,7 +563,7 @@
 			0x03000000	// EIM_CSnRCR1 @ 0x021b8008
 			0x00000000	// EIM_CSnRCR2 @ 0x021b800c
 			0x01000000	// EIM_CSnWCR1 @ 0x021b8010
-			0 		// EIM_CSnWCR2 @ 0x021b8014
+			0		// EIM_CSnWCR2 @ 0x021b8014
 		>;
 
 		status = "okay";
@@ -600,19 +597,6 @@
 
 				interrupt-parent = <&gpio5>;
 				interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
-				status = "okay";
-			};
-
-			pc104bus: fpgaisa@50 {
-				compatible = "technologic,pc104-bus";
-				reg = <0x50 0x4>;
-
-				ranges = <0 0 0x1000>;
-				reset-gpio = <&gpio3 7 0>;
-
-				#address-cells = <0x1>;
-				#size-cells = <0x1>;
-
 				status = "okay";
 			};
 
@@ -670,6 +654,19 @@
 					"ISA_DACK3",
 					"",
 					"EN_RS422";
+			};
+
+			pc104bus: fpgaisa@50 {
+				compatible = "technologic,pc104-bus";
+				reg = <0x50 0x4>;
+
+				ranges = <0 0 0x1000>;
+				reset-gpio = <&gpio3 7 0>;
+
+				#address-cells = <0x1>;
+				#size-cells = <0x1>;
+
+				status = "okay";
 			};
 
 			fpga_bank2: fpga_gpio@54 {
@@ -860,6 +857,7 @@
 			status = "okay";
 		};
 
+		/* Mikrobus UART */
 		fpga_uart5: serial@50 {
 			compatible = "ns16550a";
 			device_type = "serial";
@@ -929,7 +927,7 @@
 			opencores-spi,num-chipselects = <3>;
 			status = "okay";
 
-			spi@0 {
+			dioheader: spi@0 {
 				compatible = "technologic,spidev";
 				spi-max-frequency = <19800000>;
 				reg = <0>;
@@ -937,7 +935,7 @@
 			};
 
 			spifram: spi@1 {
-				compatible = "atmel,at25", "cypress,fm25l16b";
+				compatible = "cypress,fm25l16b", "atmel,at25";
 				reg = <1>;
 				spi-max-frequency = <19800000>;
 				size = <0x800>;
@@ -968,7 +966,7 @@
 			opencores-spi,num-chipselects = <1>;
 			status = "okay";
 
-			spi@0 {
+			mikrobus: spi@0 {
 				compatible = "technologic,spidev";
 				spi-max-frequency = <19800000>;
 				reg = <0>;
