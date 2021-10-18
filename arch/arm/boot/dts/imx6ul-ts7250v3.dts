@@ -57,6 +57,9 @@
 		serial11 = &fpga_uart3;
 		serial12 = &fpga_uart4;
 		serial13 = &fpga_uart5;
+		serial14 = &fpga_uart6;
+		serial15 = &fpga_uart7;
+		serial16 = &fpga_uart8;
 		spi4 = &opencores_spi0;
 		spi5 = &opencores_spi1;
 		gpio5 = &fpga_bank0;
