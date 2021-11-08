@@ -154,17 +154,19 @@
         uart-has-rtscts;
         rts-gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
         linux,rs485-enabled-at-boot-time;
+	dma-names = "", "";
 
 	status = "okay";
 };
 
-&uart8 {
+&uart3 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart8>;
+	pinctrl-0 = <&pinctrl_uart3 &pinctrl_uart3_txen>;
 
-        uart-has-rtscts;
-        rts-gpios = <&gpio1 22 GPIO_ACTIVE_HIGH>;
-        linux,rs485-enabled-at-boot-time;
+	uart-has-rtscts;
+	rts-gpios = <&gpio1 22 GPIO_ACTIVE_HIGH>;
+	linux,rs485-enabled-at-boot-time;
+	dma-names = "", "";
 
 	status = "okay";
 };
@@ -476,6 +478,11 @@
 			fsl,pins = <
 				MX6UL_PAD_LCD_DATA20__UART8_DCE_TX	0x1b0b1
 				MX6UL_PAD_LCD_DATA21__UART8_DCE_RX	0x1b0b1
+			>;
+		};
+
+		pinctrl_uart3_txen: uart3txen {
+			fsl,pins = <
 				/* TXEN */
 				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0x1b020
 			>;
