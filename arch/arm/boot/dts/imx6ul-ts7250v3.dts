@@ -794,7 +794,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <0>;
@@ -810,7 +810,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <1>;
@@ -826,7 +826,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <2>;
@@ -842,7 +842,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <3>;
@@ -858,7 +858,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <4>;
@@ -874,7 +874,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <5>;
@@ -889,7 +889,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <6>;
@@ -904,7 +904,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <7>;
@@ -919,7 +919,7 @@
 			current-speed = <115200>;
 			reg-shift = <1>;
 			reg-io-width = <1>;
-			fifo-size = <128>;
+			fifo-size = <64>;
 			clock-frequency = <1843200>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <8>;
