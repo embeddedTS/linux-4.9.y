@@ -194,7 +194,7 @@ static int ts4800_wdt_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id ts4800_wdt_of_match[] = {
-	{ .compatible = "technologic,ts4800-wdt", },
+	{ .compatible = "embeddedts,ts4800-wdt", },
 	{ },
 };
 MODULE_DEVICE_TABLE(of, ts4800_wdt_of_match);

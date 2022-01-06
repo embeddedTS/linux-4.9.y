@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Technologic Systems <support@embeddedarm.com>
+ * Copyright (C) 2019-2022 Technologic Systems, Inc. dba embeddedTS <support@embeddedTS.com>
  * Copyright (C) 2012 Marek Vasut <marex@denx.de>
  *
  * The code contained herein is licensed under the GNU General Public
@@ -17,7 +17,7 @@
 
 / {
 
-	model = "Technologic Systems i.MX28 TS-7670 (Default Device Tree)";
+	model = "embeddedTS i.MX28 TS-7670 (Default Device Tree)";
 	compatible = "fsl,imx28-ts7670", "fsl,imx28";
 
 	aliases {

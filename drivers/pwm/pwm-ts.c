@@ -1,7 +1,7 @@
 /*
- * PWM for Technologic Systems TS-7250-V3, TS-7120, et al.
+ * PWM for embeddedTS TS-7250-V3, TS-7120, et al.
  *
- * Copyright (C) 2021 Technologic Systems
+ * Copyright (C) 2021-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2 as
@@ -152,7 +152,7 @@ static const struct pwm_ops ts_pwm_ops = {
 };
 
 static const struct of_device_id ts_pwm_matches[] = {
-	{ .compatible = "technologic,pwm", },
+	{ .compatible = "embeddedts,pwm", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, ts_pwm_matches);
@@ -215,6 +215,6 @@ static struct platform_driver ts_pwm_driver = {
 module_platform_driver(ts_pwm_driver);
 
 MODULE_ALIAS("platform:ts-pwm");
-MODULE_DESCRIPTION("Technologic Systems PS");
-MODULE_AUTHOR("Mark Featherston <mark@embeddedarm.com>");
+MODULE_DESCRIPTION("embeddedTS PS");
+MODULE_AUTHOR("Mark Featherston <mark@embeddedTS.com>");
 MODULE_LICENSE("GPL");

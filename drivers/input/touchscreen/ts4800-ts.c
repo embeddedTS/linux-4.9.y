@@ -197,7 +197,7 @@ static int ts4800_ts_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id ts4800_ts_of_match[] = {
-	{ .compatible = "technologic,ts4800-ts", },
+	{ .compatible = "embeddedts,ts4800-ts", },
 	{ },
 };
 MODULE_DEVICE_TABLE(of, ts4800_ts_of_match);

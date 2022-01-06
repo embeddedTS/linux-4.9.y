@@ -73,7 +73,7 @@ static int tsrelay8_is_sane(struct tsrelay8_priv *priv)
 	return 1;
 }
 
-static int technologic_relay8_probe(struct platform_device *pdev)
+static int embeddedts_relay8_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct tsrelay8_priv *priv;
@@ -114,12 +114,12 @@ static int technologic_relay8_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id tsrelay8_of_match[] = {
-	{ .compatible = "technologic,tsrelay8", },
+	{ .compatible = "embeddedts,tsrelay8", },
 	{},
 };
 
 static struct platform_driver tsrelay8_driver = {
-	.probe = technologic_relay8_probe,
+	.probe = embeddedts_relay8_probe,
 	.driver = {
 		.name = "tsrelay8",
 		.of_match_table = tsrelay8_of_match,
@@ -128,6 +128,6 @@ static struct platform_driver tsrelay8_driver = {
 module_platform_driver(tsrelay8_driver);
 
 MODULE_ALIAS("platform:ts_relay8");
-MODULE_AUTHOR("Mark Featherston <mark@embeddedarm.com>");
-MODULE_DESCRIPTION("Technologic TS-RELAY8 driver");
+MODULE_AUTHOR("Mark Featherston <mark@embeddedTS.com>");
+MODULE_DESCRIPTION("embeddedTS TS-RELAY8 driver");
 MODULE_LICENSE("GPL v2");

@@ -7,7 +7,7 @@
 #include <linux/tspc104_bus.h>
 #include <linux/ts16550.h>
 
-static int technologic_ts16550_probe(struct platform_device *pdev)
+static int embeddedts_ts16550_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct ts16550_priv *priv;
@@ -54,12 +54,12 @@ static int technologic_ts16550_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id ts16550_of_match[] = {
-	{ .compatible = "technologic,ts16550", },
+	{ .compatible = "embeddedts,ts16550", },
 	{},
 };
 
 static struct platform_driver ts16550_driver = {
-	.probe = technologic_ts16550_probe,
+	.probe = embeddedts_ts16550_probe,
 	.driver = {
 		.name = "ts16550",
 		.of_match_table = ts16550_of_match,
@@ -68,6 +68,6 @@ static struct platform_driver ts16550_driver = {
 module_platform_driver(ts16550_driver);
 
 MODULE_ALIAS("platform:ts16550");
-MODULE_AUTHOR("Mark Featherston <mark@embeddedarm.com>");
-MODULE_DESCRIPTION("Technologic 16550 PC104 driver");
+MODULE_AUTHOR("Mark Featherston <mark@embeddedTS.com>");
+MODULE_DESCRIPTION("embeddedTS 16550 PC104 driver");
 MODULE_LICENSE("GPL v2");

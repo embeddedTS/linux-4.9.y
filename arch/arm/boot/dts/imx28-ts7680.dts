@@ -16,7 +16,7 @@
 
 / {
 
-	model = "Technologic Systems i.MX28 TS-7680 (Default Device Tree)";
+	model = "embeddedTS i.MX28 TS-7680 (Default Device Tree)";
 	compatible = "fsl,imx28-ts7680", "fsl,imx28";
 
 	aliases {
@@ -320,7 +320,7 @@
 				};
 
 				gpio8: ts7680gpio@28 {
-					compatible = "technologic,ts7970-gpio";
+					compatible = "embeddedts,ts7970-gpio";
 					ngpios = <64>;
 					base = <192>;
 					reg = <0x28>;

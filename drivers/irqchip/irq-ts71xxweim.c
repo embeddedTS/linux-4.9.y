@@ -19,7 +19,7 @@ static struct tsweim_intc_priv {
 } priv;
 
 static const struct of_device_id tsweim_intc_of_match_table[] = {
-	{.compatible = "technologic,ts71xxweim-intc", },
+	{.compatible = "embeddedts,ts71xxweim-intc", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, tsweim_intc_of_match_table);
@@ -163,6 +163,6 @@ static struct platform_driver tsweim_intc_driver = {
 };
 module_platform_driver(tsweim_intc_driver);
 
-MODULE_AUTHOR("Technologic Systems");
-MODULE_DESCRIPTION("Interrupt Controller for Technologic Systems WEIM FPGA");
+MODULE_AUTHOR("embeddedTS");
+MODULE_DESCRIPTION("Interrupt Controller for embeddedTS WEIM FPGA");
 MODULE_LICENSE("GPL");

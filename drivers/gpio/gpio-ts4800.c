@@ -63,7 +63,7 @@ static int ts4800_gpio_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id ts4800_gpio_of_match[] = {
-	{ .compatible = "technologic,ts4800-gpio", },
+	{ .compatible = "embeddedts,ts4800-gpio", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, ts4800_gpio_of_match);

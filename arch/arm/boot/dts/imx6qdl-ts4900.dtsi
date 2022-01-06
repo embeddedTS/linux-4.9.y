@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Technologic Systems
+ * Copyright 2015-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * This file is dual-licensed: you can use it either under the terms
  * of the GPL or the X11 license, at your option. Note that this dual
@@ -138,7 +138,7 @@
 	};
 
 	gpio8: gpio@28 {
-		compatible = "technologic,ts4900-gpio";
+		compatible = "embeddedts,ts4900-gpio";
 		reg = <0x28>;
 		#gpio-cells = <2>;
 		gpio-controller;

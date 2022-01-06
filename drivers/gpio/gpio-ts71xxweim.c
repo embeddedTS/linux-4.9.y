@@ -1,7 +1,7 @@
 /*
- * Digital I/O driver for Technologic Systems TS-7120, TS-7100, et al.
+ * Digital I/O driver for embeddedTS TS-7120, TS-7100, et al.
  *
- * Copyright (C) 2019 Technologic Systems
+ * Copyright (C) 2019-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2 as
@@ -109,7 +109,7 @@ static const struct gpio_chip template_chip = {
 };
 
 static const struct of_device_id tsweim_gpio_of_match_table[] = {
-	{ .compatible = "technologic,ts71xxweim-gpio", },
+	{ .compatible = "embeddedts,ts71xxweim-gpio", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, tsweim_gpio_of_match_table);
@@ -175,6 +175,6 @@ static struct platform_driver tsweim_gpio_driver = {
 };
 module_platform_driver(tsweim_gpio_driver);
 
-MODULE_AUTHOR("Technologic Systems");
-MODULE_DESCRIPTION("GPIO interface for Technologic Systems WEIM FPGA");
+MODULE_AUTHOR("embeddedTS");
+MODULE_DESCRIPTION("GPIO interface for embeddedTS WEIM FPGA");
 MODULE_LICENSE("GPL");

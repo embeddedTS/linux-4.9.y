@@ -46,7 +46,7 @@ struct sja1000_of_data {
 	int     (*init)(struct sja1000_priv *priv, struct device_node *of);
 };
 
-struct technologic_priv {
+struct embeddedts_priv {
 	spinlock_t      io_lock;
 };
 
@@ -80,9 +80,9 @@ static void sp_write_reg32(const struct sja1000_priv *priv, int reg, u8 val)
 	iowrite8(val, priv->reg_base + reg * 4);
 }
 
-static u8 sp_technologic_read_reg16(const struct sja1000_priv *priv, int reg)
+static u8 sp_embeddedts_read_reg16(const struct sja1000_priv *priv, int reg)
 {
-	struct technologic_priv *tp = priv->priv;
+	struct embeddedts_priv *tp = priv->priv;
 	unsigned long flags;
 	u8 val;
 
@@ -94,10 +94,10 @@ static u8 sp_technologic_read_reg16(const struct sja1000_priv *priv, int reg)
 	return val;
 }
 
-static void sp_technologic_write_reg16(const struct sja1000_priv *priv,
+static void sp_embeddedts_write_reg16(const struct sja1000_priv *priv,
 				       int reg, u8 val)
 {
-	struct technologic_priv *tp = priv->priv;
+	struct embeddedts_priv *tp = priv->priv;
 	unsigned long flags;
 
 	spin_lock_irqsave(&tp->io_lock, flags);
@@ -106,12 +106,12 @@ static void sp_technologic_write_reg16(const struct sja1000_priv *priv,
 	spin_unlock_irqrestore(&tp->io_lock, flags);
 }
 
-static int sp_technologic_init(struct sja1000_priv *priv, struct device_node *of)
+static int sp_embeddedts_init(struct sja1000_priv *priv, struct device_node *of)
 {
-	struct technologic_priv *tp = priv->priv;
+	struct embeddedts_priv *tp = priv->priv;
 
-	priv->read_reg = sp_technologic_read_reg16;
-	priv->write_reg = sp_technologic_write_reg16;
+	priv->read_reg = sp_embeddedts_read_reg16;
+	priv->write_reg = sp_embeddedts_write_reg16;
 	spin_lock_init(&tp->io_lock);
 
 	return 0;
@@ -201,14 +201,14 @@ static void sp_populate_of(struct sja1000_priv *priv, struct device_node *of)
 		priv->cdr |= CDR_CBP; /* default */
 }
 
-static struct sja1000_of_data technologic_data = {
-	.priv_sz = sizeof(struct technologic_priv),
-	.init = sp_technologic_init,
+static struct sja1000_of_data embeddedts_data = {
+	.priv_sz = sizeof(struct embeddedts_priv),
+	.init = sp_embeddedts_init,
 };
 
 static const struct of_device_id sp_of_table[] = {
 	{ .compatible = "nxp,sja1000", .data = NULL, },
-	{ .compatible = "technologic,sja1000", .data = &technologic_data, },
+	{ .compatible = "embeddedts,sja1000", .data = &embeddedts_data, },
 	{ /* sentinel */ },
 };
 MODULE_DEVICE_TABLE(of, sp_of_table);

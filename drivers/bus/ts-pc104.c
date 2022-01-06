@@ -401,7 +401,7 @@ static const struct attribute_group tsisa_sysfs_group = {
 	.bin_attrs = tsisa_sysfs_bin_attrs,
 };
 
-static int technologic_isa_probe(struct platform_device *pdev)
+static int embeddedts_isa_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct resource *mem;
@@ -449,12 +449,12 @@ static int technologic_isa_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id tsisa_of_match[] = {
-	{ .compatible = "technologic,pc104-bus", },
+	{ .compatible = "embeddedts,pc104-bus", },
 	{},
 };
 
 static struct platform_driver tsisa_driver = {
-	.probe = technologic_isa_probe,
+	.probe = embeddedts_isa_probe,
 	.driver = {
 		.name = "ts-pc104-bus",
 		.of_match_table = tsisa_of_match,
@@ -463,6 +463,6 @@ static struct platform_driver tsisa_driver = {
 module_platform_driver(tsisa_driver);
 
 MODULE_ALIAS("platform:ts_pc104");
-MODULE_AUTHOR("Mark Featherston <mark@embeddedarm.com>");
-MODULE_DESCRIPTION("Technologic ISA driver");
+MODULE_AUTHOR("Mark Featherston <mark@embeddedTS.com>");
+MODULE_DESCRIPTION("embeddedTS ISA driver");
 MODULE_LICENSE("GPL v2");

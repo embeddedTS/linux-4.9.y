@@ -1,7 +1,7 @@
 /*
- * Digital I/O driver for Technologic Systems I2C FPGA Core
+ * Digital I/O driver for embeddedTS I2C FPGA Core
  *
- * Copyright (C) 2015 Technologic Systems
+ * Copyright (C) 2015-2022 Technologic Systems, Inc. dba embeddedTS
  * Copyright (C) 2016 Savoir-Faire Linux
  *
  * This program is free software; you can redistribute it and/or
@@ -129,10 +129,10 @@ static const struct gpio_chip template_chip = {
 
 static const struct of_device_id ts4900_gpio_of_match_table[] = {
 	{
-		.compatible = "technologic,ts4900-gpio",
+		.compatible = "embeddedts,ts4900-gpio",
 		.data = (void *)TS4900_GPIO_IN,
 	}, {
-		.compatible = "technologic,ts7970-gpio",
+		.compatible = "embeddedts,ts7970-gpio",
 		.data = (void *)TS7970_GPIO_IN,
 	},
 	{ /* sentinel */ },
@@ -204,6 +204,6 @@ static struct i2c_driver ts4900_gpio_driver = {
 };
 module_i2c_driver(ts4900_gpio_driver);
 
-MODULE_AUTHOR("Technologic Systems");
-MODULE_DESCRIPTION("GPIO interface for Technologic Systems I2C-FPGA core");
+MODULE_AUTHOR("embeddedTS");
+MODULE_DESCRIPTION("GPIO interface for embeddedTS I2C-FPGA core");
 MODULE_LICENSE("GPL");

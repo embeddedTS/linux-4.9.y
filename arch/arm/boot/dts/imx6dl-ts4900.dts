@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Technologic Systems
+ * Copyright 2015-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * This file is dual-licensed: you can use it either under the terms
  * of the GPL or the X11 license, at your option. Note that this dual
@@ -44,6 +44,6 @@
 #include "imx6qdl-ts4900.dtsi"
 
 / {
-	model = "Technologic Systems i.MX6 Solo/DualLite TS-4900 (Default Device Tree)";
-	compatible = "technologic,imx6dl-ts4900", "fsl,imx6dl";
+	model = "embeddedTS i.MX6 Solo/DualLite TS-4900 (Default Device Tree)";
+	compatible = "embeddedts,imx6dl-ts4900", "fsl,imx6dl";
 };

@@ -151,11 +151,11 @@ config TEGRA_ACONNECT
 	  the devices inside the Audio Processing Engine (APE) for Tegra210.
 
 config TSPC104
-	tristate "Technologic Systems PC104 memory window bus"
+	tristate "embeddedTS PC104 memory window bus"
 	depends on HAS_IOMEM
 	depends on OF
 	help
-	  Driver for Technologic Systems PC104 implementation inside of
+	  Driver for embeddedTS PC104 implementation inside of
 	  a memory window.
 
 config UNIPHIER_SYSTEM_BUS

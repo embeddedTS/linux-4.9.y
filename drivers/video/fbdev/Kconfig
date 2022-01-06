@@ -2455,7 +2455,7 @@ config FB_ST7565P
 	---help---
 	  This is a `virtual' frame buffer device specifically for the
 	  ST7565P LCD display device when attached to a
-	  Technologic Systems TS-7553-V2
+	  embeddedTS TS-7553-V2
 	  board.
 
 	  This driver also requires a userspace program ("lcd-helper") to communicate

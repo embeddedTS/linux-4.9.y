@@ -1,7 +1,7 @@
 /*
  * ADC driver for simple 8-bit ADC on TS-7250-V3
  *
- * Copyright (C) 2021 Technologic Systems
+ * Copyright (C) 2021-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2 as
@@ -210,7 +210,7 @@ static int ts_simple_adc_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id tsadc_of_match[] = {
-	{ .compatible = "technologic,ts-simple-adc", },
+	{ .compatible = "embeddedts,ts-simple-adc", },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, tsadc_of_match);
@@ -224,6 +224,6 @@ static struct platform_driver tsadc_driver = {
 };
 module_platform_driver(tsadc_driver);
 
-MODULE_AUTHOR("Mark Featherston <mark@embeddedarm.com>");
+MODULE_AUTHOR("Mark Featherston <mark@embeddedTS.com>");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("IIO ADC driver Technologic Simple FPGA ADC");
+MODULE_DESCRIPTION("IIO ADC driver embeddedTS Simple FPGA ADC");

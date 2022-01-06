@@ -526,13 +526,13 @@ config TI_AM335X_ADC
 	  called ti_am335x_adc.
 
 config TS_SIMPLEADC
-	tristate "Technologic Systems simple FPGA ADC"
+	tristate "embeddedTS simple FPGA ADC"
 	depends on OF
 	depends on HAS_IOMEM
 	select IIO_BUFFER
 	select IIO_KFIFO_BUF
 	help
-	  Say yes here to build support for Technologic systems FPGA based ADC.
+	  Say yes here to build support for embeddedTS FPGA based ADC.
 
 	  To compile this driver as a module, choose M here: the module will be
 	  called ts_simple_adc.

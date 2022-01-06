@@ -447,7 +447,7 @@ config  PWM_TIPWMSS
 config PWM_TS
 	tristate "TS FPGA PWM support"
 	help
-	  PWM driver support for Technologic Systems FPGA based PWM controller
+	  PWM driver support for embeddedTS FPGA based PWM controller
 
 	  To compile this driver as a module, choose M here: the module
 	  will be called pwm-ts.

@@ -31,7 +31,7 @@
 
 static struct i2c_client *client;
 
-/* This driver supports the Technologic Systems 2nd generation WDT in
+/* This driver supports the embeddedTS 2nd generation WDT in
  * microcontroller.
  *
  * The 2nd gen WDT is still in I2C microcontroller, but follows more "standard"
@@ -249,7 +249,7 @@ static const struct i2c_device_id ts7100_wdt_id[] = {
 MODULE_DEVICE_TABLE(i2c, ts7100_wdt_id);
 
 static const struct of_device_id ts7100_wdt_of_match[] = {
-	{ .compatible = "technologic,ts7100-wdt", },
+	{ .compatible = "embeddedts,ts7100-wdt", },
 	{ },
 };
 MODULE_DEVICE_TABLE(of, ts7100_wdt_of_match);
@@ -278,6 +278,6 @@ static void __exit ts_reboot_exit(void)
 }
 module_exit(ts_reboot_exit);
 
-MODULE_AUTHOR("Kris Bahnsen <kris@embeddedarm.com>");
-MODULE_DESCRIPTION("Technologic Systems' TS-7100 (and compat.) WDT driver");
+MODULE_AUTHOR("Kris Bahnsen <kris@embeddedTS.com>");
+MODULE_DESCRIPTION("embeddedTS' TS-7100 (and compat.) WDT driver");
 MODULE_LICENSE("GPL");

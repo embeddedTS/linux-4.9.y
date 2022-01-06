@@ -1,5 +1,5 @@
  /*
- * Copyright 2018 Technologic Systems
+ * Copyright 2018-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * The code contained herein is licensed under the GNU General Public
  * License. You may obtain a copy of the GNU General Public License
@@ -13,7 +13,7 @@
 #include "imx6ul-ts4100.dtsi"
 
 / {
-	model = "Technologic Systems i.MX6ul TS-4100 (TS-Custom)";
+	model = "embeddedTS i.MX6ul TS-4100 (TS-Custom)";
 	compatible = "fsl,imx6ul-ts4100", "fsl,imx6ul";
 };
 

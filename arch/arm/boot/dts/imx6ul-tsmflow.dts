@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Technologic Systems
+ * Copyright (C) 2020-2022 Technologic Systems, Inc. dba embeddedTS
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -11,8 +11,8 @@
 #include "imx6ul.dtsi"
 
 / {
-	model = "Technologic Systems i.MX6UL TS-MFlow ";
-	compatible = "technologic,tsmflow", "fsl,imx6ul";
+	model = "embeddedTS i.MX6UL TS-MFlow ";
+	compatible = "embeddedts,tsmflow", "fsl,imx6ul";
 
 	chosen {
 		stdout-path = &uart1;
@@ -171,7 +171,7 @@
 		};
 
 		silabs: silabs@54 {
-			compatible = "technologic,ts7100-wdt";
+			compatible = "embeddedts,ts7100-wdt";
 			/* 5min timeout default, in case of slow userspace.
 			 * Set to 0 to disable WDT at startup. Userspace procs
 			 * can still start feeding later.
