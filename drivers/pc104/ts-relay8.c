@@ -73,7 +73,7 @@ static int tsrelay8_is_sane(struct tsrelay8_priv *priv)
 	return 1;
 }
 
-static int embeddedts_relay8_probe(struct platform_device *pdev)
+static int technologic_relay8_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct tsrelay8_priv *priv;
@@ -114,12 +114,12 @@ static int embeddedts_relay8_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id tsrelay8_of_match[] = {
-	{ .compatible = "embeddedts,tsrelay8", },
+	{ .compatible = "technologic,tsrelay8", },
 	{},
 };
 
 static struct platform_driver tsrelay8_driver = {
-	.probe = embeddedts_relay8_probe,
+	.probe = technologic_relay8_probe,
 	.driver = {
 		.name = "tsrelay8",
 		.of_match_table = tsrelay8_of_match,

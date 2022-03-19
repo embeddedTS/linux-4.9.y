@@ -210,7 +210,7 @@ static int ts_simple_adc_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id tsadc_of_match[] = {
-	{ .compatible = "embeddedts,ts-simple-adc", },
+	{ .compatible = "technologic,ts-simple-adc", },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, tsadc_of_match);

@@ -45,7 +45,7 @@
 
 / {
 	model = "embeddedTS i.MX6 Quad TS-4900 (Default Device Tree)";
-	compatible = "embeddedts,imx6q-ts4900", "fsl,imx6q";
+	compatible = "technologic,imx6q-ts4900", "fsl,imx6q";
 };
 
 &sata {

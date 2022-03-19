@@ -6,8 +6,8 @@ uses 2 bits: it doesn't use a dedicated input bit.
 
 Required properties:
 - compatible: Should be one of the following
-		"embeddedts,ts4900-gpio"
-		"embeddedts,ts7970-gpio"
+		"technologic,ts4900-gpio"
+		"technologic,ts7970-gpio"
 - reg: Physical base address of the controller and length
        of memory mapped region.
 - #gpio-cells: Should be two. The first cell is the pin number.
@@ -21,7 +21,7 @@ Example:
 
 &i2c2 {
 	gpio8: gpio@28 {
-		compatible = "embeddedts,ts4900-gpio";
+		compatible = "technologic,ts4900-gpio";
 		reg = <0x28>;
 		#gpio-cells = <2>;
 		gpio-controller;

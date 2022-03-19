@@ -129,10 +129,10 @@ static const struct gpio_chip template_chip = {
 
 static const struct of_device_id ts4900_gpio_of_match_table[] = {
 	{
-		.compatible = "embeddedts,ts4900-gpio",
+		.compatible = "technologic,ts4900-gpio",
 		.data = (void *)TS4900_GPIO_IN,
 	}, {
-		.compatible = "embeddedts,ts7970-gpio",
+		.compatible = "technologic,ts7970-gpio",
 		.data = (void *)TS7970_GPIO_IN,
 	},
 	{ /* sentinel */ },

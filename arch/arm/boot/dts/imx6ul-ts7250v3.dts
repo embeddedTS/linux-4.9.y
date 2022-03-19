@@ -45,7 +45,7 @@
 
 / {
 	model = "embeddedTS i.MX6UL TS-7250-V3";
-	compatible = "embeddedts,ts7250v3", "fsl,imx6ul";
+	compatible = "technologic,ts7250v3", "fsl,imx6ul";
 
 	aliases {
 		ethernet0 = &fec1;
@@ -162,7 +162,7 @@
 	};
 
 	silabs: silabs@54 {
-		compatible = "embeddedts,ts7100-wdt";
+		compatible = "technologic,ts7100-wdt";
 		/* 5min timeout default, in case of slow userspace.
 		 * Set to 0 to disable WDT at startup. Userspace procs
 		 * can still start feeding later.
@@ -592,7 +592,7 @@
 			status = "okay";
 
 			fpga_intc: fpga_intc@0 {
-				compatible = "embeddedts,ts71xxweim-intc";
+				compatible = "technologic,ts71xxweim-intc";
 				reg = <0x0 0x50>;
 
 				interrupt-controller;
@@ -604,7 +604,7 @@
 			};
 
 			fpga_bank0: fpga_gpio@10 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x10 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -632,7 +632,7 @@
 			};
 
 			fpga_bank1: fpga_gpio@40 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x40 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -660,7 +660,7 @@
 			};
 
 			pc104bus: fpgaisa@50 {
-				compatible = "embeddedts,pc104-bus";
+				compatible = "technologic,pc104-bus";
 				reg = <0x50 0x4>;
 
 				ranges = <0 0 0x1000>;
@@ -673,7 +673,7 @@
 			};
 
 			fpga_bank2: fpga_gpio@54 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x54 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -701,7 +701,7 @@
 			};
 
 			fpga_bank3: fpga_gpio@5c {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x5c 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -729,7 +729,7 @@
 			};
 
 			fpga_bank4: fpga_gpio@64 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x64 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -757,7 +757,7 @@
 			};
 
 			fpga_bank5: fpga_gpio@6c {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0x6c 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -940,7 +940,7 @@
 			status = "okay";
 
 			dioheader: spi@0 {
-				compatible = "embeddedts,spidev";
+				compatible = "technologic,spidev";
 				spi-max-frequency = <19800000>;
 				reg = <0>;
 				status = "okay";
@@ -979,7 +979,7 @@
 			status = "okay";
 
 			mikrobus: spi@0 {
-				compatible = "embeddedts,spidev";
+				compatible = "technologic,spidev";
 				spi-max-frequency = <19800000>;
 				reg = <0>;
 				status = "okay";
@@ -987,7 +987,7 @@
 		};
 
 		mikro_adc0: mikro_adc@180 {
-			compatible = "embeddedts,ts-simple-adc";
+			compatible = "technologic,ts-simple-adc";
 			reg = <0x180 4>;
 			interrupt-parent = <&fpga_intc>;
 			interrupts = <19>;
@@ -1007,7 +1007,7 @@
 		};
 
 		mikro_pwm: mikro_pwm@1a8 {
-			compatible = "embeddedts,pwm";
+			compatible = "technologic,pwm";
 			reg = <0x1a8 8>;
 			clocks = <&fpga_clk_weim_bclk>;
 			clock-names = "pwm-input-clk";

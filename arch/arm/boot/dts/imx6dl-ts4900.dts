@@ -45,5 +45,5 @@
 
 / {
 	model = "embeddedTS i.MX6 Solo/DualLite TS-4900 (Default Device Tree)";
-	compatible = "embeddedts,imx6dl-ts4900", "fsl,imx6dl";
+	compatible = "technologic,imx6dl-ts4900", "fsl,imx6dl";
 };

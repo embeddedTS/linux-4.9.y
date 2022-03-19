@@ -323,7 +323,7 @@
 				};
 
 				gpio8: ts7680gpio@28 {
-					compatible = "embeddedts,ts7970-gpio";
+					compatible = "technologic,ts7970-gpio";
 					ngpios = <64>;
 					base = <192>;
 					reg = <0x28>;

@@ -401,7 +401,7 @@ static const struct attribute_group tsisa_sysfs_group = {
 	.bin_attrs = tsisa_sysfs_bin_attrs,
 };
 
-static int embeddedts_isa_probe(struct platform_device *pdev)
+static int technologic_isa_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct resource *mem;
@@ -449,12 +449,12 @@ static int embeddedts_isa_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id tsisa_of_match[] = {
-	{ .compatible = "embeddedts,pc104-bus", },
+	{ .compatible = "technologic,pc104-bus", },
 	{},
 };
 
 static struct platform_driver tsisa_driver = {
-	.probe = embeddedts_isa_probe,
+	.probe = technologic_isa_probe,
 	.driver = {
 		.name = "ts-pc104-bus",
 		.of_match_table = tsisa_of_match,

@@ -109,7 +109,7 @@ static const struct gpio_chip template_chip = {
 };
 
 static const struct of_device_id tsweim_gpio_of_match_table[] = {
-	{ .compatible = "embeddedts,ts71xxweim-gpio", },
+	{ .compatible = "technologic,ts71xxweim-gpio", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, tsweim_gpio_of_match_table);

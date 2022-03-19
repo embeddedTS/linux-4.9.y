@@ -143,7 +143,7 @@ static int ts4800_ic_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id ts4800_ic_of_match[] = {
-	{ .compatible = "embeddedts,ts4800-irqc", },
+	{ .compatible = "technologic,ts4800-irqc", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, ts4800_ic_of_match);
