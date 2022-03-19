@@ -12,7 +12,7 @@
 
 / {
 	model = "embeddedTS i.MX6UL TS-MFlow ";
-	compatible = "embeddedts,tsmflow", "fsl,imx6ul";
+	compatible = "technologic,tsmflow", "fsl,imx6ul";
 
 	chosen {
 		stdout-path = &uart1;
@@ -171,7 +171,7 @@
 		};
 
 		silabs: silabs@54 {
-			compatible = "embeddedts,ts7100-wdt";
+			compatible = "technologic,ts7100-wdt";
 			/* 5min timeout default, in case of slow userspace.
 			 * Set to 0 to disable WDT at startup. Userspace procs
 			 * can still start feeding later.

@@ -142,7 +142,7 @@
 		};
 
 		silabs: silabs@54 {
-			compatible = "embeddedts,ts7100-wdt";
+			compatible = "technologic,ts7100-wdt";
 			/* 5min timeout default, in case of slow userspace.
 			 * Set to 0 to disable WDT at startup. Userspace procs
 			 * can still start feeding later.
@@ -324,7 +324,7 @@
 			status = "okay";
 
 			gpio6: fpga_gpio6@10 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0 0x10 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -336,7 +336,7 @@
 			};
 
 			gpio7: fpga_gpio7@40 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0 0x40 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -348,7 +348,7 @@
 			};
 
 			gpio8: fpga_gpio8@50 {
-				compatible = "embeddedts,ts71xxweim-gpio";
+				compatible = "technologic,ts71xxweim-gpio";
 				reg = <0 0x50 0x08>;
 				gpio-controller;
 				#gpio-cells = <2>;
@@ -360,7 +360,7 @@
 			};
 
 			fpga_intc: fpga_intc@0 {
-				compatible = "embeddedts,ts71xxweim-intc";
+				compatible = "technologic,ts71xxweim-intc";
 
 				interrupt-controller;
 				#interrupt-cells = <1>;

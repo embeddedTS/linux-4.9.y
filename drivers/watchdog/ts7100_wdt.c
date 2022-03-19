@@ -249,7 +249,7 @@ static const struct i2c_device_id ts7100_wdt_id[] = {
 MODULE_DEVICE_TABLE(i2c, ts7100_wdt_id);
 
 static const struct of_device_id ts7100_wdt_of_match[] = {
-	{ .compatible = "embeddedts,ts7100-wdt", },
+	{ .compatible = "technologic,ts7100-wdt", },
 	{ },
 };
 MODULE_DEVICE_TABLE(of, ts7100_wdt_of_match);

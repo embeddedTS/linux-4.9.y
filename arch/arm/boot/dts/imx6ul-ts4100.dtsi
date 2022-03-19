@@ -409,7 +409,7 @@
 
 	/* This may need to be reworked here */
 	gpio6: gpio@28 {
-		compatible = "embeddedts,ts4900-gpio";
+		compatible = "technologic,ts4900-gpio";
 		reg = <0x28>;
 		#gpio-cells = <2>;
 		gpio-controller;

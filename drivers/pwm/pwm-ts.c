@@ -152,7 +152,7 @@ static const struct pwm_ops ts_pwm_ops = {
 };
 
 static const struct of_device_id ts_pwm_matches[] = {
-	{ .compatible = "embeddedts,pwm", },
+	{ .compatible = "technologic,pwm", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, ts_pwm_matches);

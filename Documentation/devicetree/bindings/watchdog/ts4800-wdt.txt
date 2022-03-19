@@ -1,7 +1,7 @@
 embeddedTS Watchdog
 
 Required properties:
-- compatible: must be "embeddedts,ts4800-wdt"
+- compatible: must be "technologic,ts4800-wdt"
 - syscon: phandle / integer array that points to the syscon node which
           describes the FPGA's syscon registers.
           - phandle to FPGA's syscon
@@ -18,7 +18,7 @@ syscon: syscon@b0010000 {
 	reg-io-width = <2>;
 
 	wdt@e {
-		compatible = "embeddedts,ts4800-wdt";
+		compatible = "technologic,ts4800-wdt";
 		syscon = <&syscon 0xe>;
 		timeout-sec = <10>;
 	};

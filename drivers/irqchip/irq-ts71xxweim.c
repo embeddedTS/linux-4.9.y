@@ -19,7 +19,7 @@ static struct tsweim_intc_priv {
 } priv;
 
 static const struct of_device_id tsweim_intc_of_match_table[] = {
-	{.compatible = "embeddedts,ts71xxweim-intc", },
+	{.compatible = "technologic,ts71xxweim-intc", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, tsweim_intc_of_match_table);

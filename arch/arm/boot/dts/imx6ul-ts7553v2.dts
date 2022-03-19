@@ -12,7 +12,7 @@
 
 / {
 	model = "embeddedTS i.MX6ul TS-7553-V2";
-	compatible = "embeddedts,ts7553v2", "fsl,imx6ul";
+	compatible = "technologic,ts7553v2", "fsl,imx6ul";
 
 	chosen {
 		stdout-path = &uart1;

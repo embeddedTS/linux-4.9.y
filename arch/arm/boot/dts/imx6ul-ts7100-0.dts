@@ -13,6 +13,6 @@
 
 / {
 	model = "embeddedTS i.MX6UL TS-7100 (TS-7100-Z)";
-	compatible = "embeddedts,ts7100", "embeddedts,ts7100z", "fsl,imx6ul";
+	compatible = "technologic,ts7100", "technologic,ts7100z", "fsl,imx6ul";
 };
 

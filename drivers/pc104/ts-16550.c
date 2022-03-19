@@ -7,7 +7,7 @@
 #include <linux/tspc104_bus.h>
 #include <linux/ts16550.h>
 
-static int embeddedts_ts16550_probe(struct platform_device *pdev)
+static int technologic_ts16550_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct ts16550_priv *priv;
@@ -54,12 +54,12 @@ static int embeddedts_ts16550_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id ts16550_of_match[] = {
-	{ .compatible = "embeddedts,ts16550", },
+	{ .compatible = "technologic,ts16550", },
 	{},
 };
 
 static struct platform_driver ts16550_driver = {
-	.probe = embeddedts_ts16550_probe,
+	.probe = technologic_ts16550_probe,
 	.driver = {
 		.name = "ts16550",
 		.of_match_table = ts16550_of_match,
