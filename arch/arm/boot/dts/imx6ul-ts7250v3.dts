@@ -627,8 +627,8 @@
 					"DIO_SPI_CS#",
 					"SILAB_CLK",
 					"SILAB_DAT",
-					"",
-					"";
+					"DIO_SPI_CLK",
+					"DIO_SPI_MOSI";
 			};
 
 			fpga_bank1: fpga_gpio@40 {
