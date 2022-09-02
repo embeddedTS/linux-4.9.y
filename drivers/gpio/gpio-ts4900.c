@@ -70,8 +70,8 @@ static int ts4900_gpio_direction_output(struct gpio_chip *chip,
 	 * prevents a glitch that can occur on the IO line
 	 */
 	regmap_read(priv->regmap, offset, &reg);
-	if(!(reg & TS4900_GPIO_OE)) {
-		if(value)
+	if (!(reg & TS4900_GPIO_OE)) {
+		if (value)
 			reg = TS4900_GPIO_OUT;
 		else
 			reg &= ~TS4900_GPIO_OUT;
