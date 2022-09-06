@@ -1,0 +1,19 @@
+/*
+ * Copyright (C) 2021 Technologic Systems, Inc. dba embeddedTS <support@embeddedTS.com>
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+#include "imx6ul-ts4100.dtsi"
+#include "imx6ul-ts4100-tslh300.dtsi"
+
+/ {
+	model = "embeddedTS i.MX6ul TS-4100 (LH-300)";
+	compatible = "fsl,imx6ul-ts4100", "fsl,imx6ul";
+};
