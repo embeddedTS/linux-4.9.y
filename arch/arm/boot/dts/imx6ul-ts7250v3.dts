@@ -670,6 +670,50 @@
 				#size-cells = <0x1>;
 
 				status = "okay";
+
+				/* COMA */
+				ts16550@3f8 {
+					compatible = "technologic,ts16550";
+
+					reg = <0x3f8 8>;
+					interrupt-parent = <&fpga_intc>;
+					interrupts = <15>;
+
+					status = "okay";
+				};
+
+				/* COMB */
+				ts16550@2f8 {
+					compatible = "technologic,ts16550";
+
+					reg = <0x2f8 8>;
+					interrupt-parent = <&fpga_intc>;
+					interrupts = <15>;
+
+					status = "okay";
+				};
+
+				/* COMC */
+				ts16550@3e8 {
+					compatible = "technologic,ts16550";
+
+					reg = <0x3e8 8>;
+					interrupt-parent = <&fpga_intc>;
+					interrupts = <15>;
+
+					status = "okay";
+				};
+
+				/* COMD */
+				ts16550@2e8 {
+					compatible = "technologic,ts16550";
+
+					reg = <0x2e8 8>;
+					interrupt-parent = <&fpga_intc>;
+					interrupts = <15>;
+
+					status = "okay";
+				};
 			};
 
 			fpga_bank2: fpga_gpio@54 {
