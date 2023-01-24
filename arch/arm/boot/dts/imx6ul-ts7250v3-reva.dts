@@ -161,9 +161,15 @@
 		status = "okay";
 	};
 
-	supervisor: supervisor@10 {
-		compatible = "technologic,supervisor";
-		reg = <0x10>;
+	silabs: silabs@54 {
+		compatible = "technologic,ts7100-wdt";
+		/* 5min timeout default, in case of slow userspace.
+		 * Set to 0 to disable WDT at startup. Userspace procs
+		 * can still start feeding later.
+		 */
+		timeout-sec = <300>;
+		reg = <0x54>;
+		status = "okay";
 	};
 
 	rtc: m41t00s@68 {
@@ -535,9 +541,7 @@
 };
 
 &wdog1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_wdog>;
-	status = "okay";
+	status = "disabled";
 };
 
 &weim {
@@ -660,7 +664,7 @@
 				reg = <0x50 0x4>;
 
 				ranges = <0 0 0x1000>;
-				reset-gpio = <&gpio3 7 0>;
+				reset-gpio = <&gpio3 7 GPIO_ACTIVE_HIGH>;
 
 				#address-cells = <0x1>;
 				#size-cells = <0x1>;
@@ -1256,16 +1260,9 @@
 				MX6UL_PAD_SNVS_TAMPER3__GPIO5_IO03	0x1b0a0
 			>;
 		};
-
 		pinctrl_weim_cs0: weimcs0grp {
 			fsl,pins = <
 				MX6UL_PAD_CSI_MCLK__GPIO4_IO17		0xb029 /* EIM_CS0# */
-			>;
-		};
-
-		pinctrl_wdog: wdoggrp {
-			fsl,pins = <
-				MX6UL_PAD_LCD_RESET__WDOG1_WDOG_ANY	0xb029
 			>;
 		};
 
