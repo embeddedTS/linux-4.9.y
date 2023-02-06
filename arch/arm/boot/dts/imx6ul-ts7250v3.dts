@@ -660,7 +660,7 @@
 				reg = <0x50 0x4>;
 
 				ranges = <0 0 0x1000>;
-				reset-gpio = <&gpio3 7 0>;
+				reset-gpio = <&gpio3 7 GPIO_ACTIVE_LOW>;
 
 				#address-cells = <0x1>;
 				#size-cells = <0x1>;
