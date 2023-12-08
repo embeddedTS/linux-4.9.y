@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0+ or X11
+/*
+ * Copyright (C) 2023 Technologic Systems, Inc. dba embeddedTS
+ */
+
+/dts-v1/;
+#include "imx6ul-ts7100.dtsi"
+#include "imx6ul-ts7100-3.dtsi"
+
+/ {
+	model = "embeddedTS i.MX6UL TS-7100 (3)";
+	compatible = "technologic,ts7100", "fsl,imx6ul";
+};

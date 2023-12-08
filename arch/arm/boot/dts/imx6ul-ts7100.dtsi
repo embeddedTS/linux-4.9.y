@@ -227,31 +227,6 @@
 	status = "okay";
 };
 
-&uart2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart2>;
-	status = "okay";
-};
-
-&uart3 { /* BT */
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart3>;
-	status = "okay";
-	fsl,uart-has-rtscts;
-};
-
-&uart4 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart4>;
-	status = "okay";
-};
-
-&uart5 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart5>;
-	status = "okay";
-};
-
 &uart7 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart7>;
@@ -434,19 +409,20 @@
 			touch_spi: touch_spi@0 {
                                 #address-cells = <1>;
                                 #size-cells = <1>;
+
 				reg = <0>;
 				compatible = "ti,tsc2046";
 				spi-max-frequency = <1000000>;
 				interrupt-parent = <&fpga_intc>;
 				interrupts = <16>;
 				pendown-gpio = <&gpio8 0 GPIO_ACTIVE_HIGH>;
-				vcc-supply = <&dummy_3v3>;
 				status = "okay";
 
 				ti,x-min = /bits/ 16 <310>;
 				ti,x-max = /bits/ 16 <3760>;
 				ti,y-min = /bits/ 16 <3810>;
 				ti,y-max = /bits/ 16 <270>;
+
 				ti,vref-mv = /bits/ 16 <3300>;
 				ti,keep-vref-on;
 				ti,settle-delay-usec = /bits/ 16 <5000>;
@@ -476,7 +452,7 @@
 			native-mode = <&timing0>;
 
 			timing0: timing0 {
-				clock-frequency = <7000>;
+				clock-frequency = <7000000>;
 				hactive = <240>;
 				vactive = <320>;
 				hfront-porch = <38>;
@@ -546,51 +522,6 @@
 			fsl,pins = <
 				MX6UL_PAD_UART2_CTS_B__FLEXCAN2_TX	0x1b020
 				MX6UL_PAD_UART2_RTS_B__FLEXCAN2_RX	0x1b020
-			>;
-		};
-
-		pinctrl_uart1: uart1grp {
-			fsl,pins = <
-				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX	0x1b0b1
-				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX	0x1b0b1
-			>;
-		};
-
-		pinctrl_uart2: uart2grp {
-			fsl,pins = <
-				MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x1b0b1
-				MX6UL_PAD_UART2_RX_DATA__UART2_DCE_RX	0x1b0b1
-			>;
-		};
-
-		pinctrl_uart3: uart3grp {
-			fsl,pins = <
-				MX6UL_PAD_UART3_RX_DATA__UART3_DCE_RX	0x1b0b1
-				MX6UL_PAD_UART3_TX_DATA__UART3_DCE_TX	0x1b0b1
-				MX6UL_PAD_UART3_CTS_B__UART3_DCE_CTS	0x1b0b1
-				MX6UL_PAD_UART3_RTS_B__UART3_DCE_RTS	0x1b0b1
-			>;
-		};
-
-		pinctrl_uart4: uart4grp {
-			fsl,pins = <
-				MX6UL_PAD_UART4_RX_DATA__UART4_DCE_RX	0x1b0b1
-				MX6UL_PAD_UART4_TX_DATA__UART4_DCE_TX	0x1b0b1
-			>;
-		};
-
-		pinctrl_uart5: uart5grp {
-			fsl,pins = <
-				MX6UL_PAD_UART5_RX_DATA__UART5_DCE_RX	0x1b0b1
-				MX6UL_PAD_UART5_TX_DATA__UART5_DCE_TX	0x1b0b1
-			>;
-		};
-
-		/* Connected just to FPGA */
-		pinctrl_uart7: uart7grp {
-			fsl,pins = <
-				MX6UL_PAD_LCD_DATA17__UART7_DCE_RX	0x1b0b1
-				MX6UL_PAD_LCD_DATA16__UART7_DCE_TX	0x1b0b1
 			>;
 		};
 
@@ -725,6 +656,21 @@
 				MX6UL_PAD_LCD_ENABLE__LCDIF_ENABLE	0x1b0b9
 				MX6UL_PAD_LCD_HSYNC__LCDIF_HSYNC	0x1b0b9
 				MX6UL_PAD_LCD_VSYNC__LCDIF_VSYNC	0x1b0b9
+			>;
+		};
+
+		pinctrl_uart1: uart1grp {
+			fsl,pins = <
+				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX	0x1b0b1
+				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX	0x1b0b1
+			>;
+		};
+
+		/* Connected just to FPGA */
+		pinctrl_uart7: uart7grp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA17__UART7_DCE_RX	0x1b0b1
+				MX6UL_PAD_LCD_DATA16__UART7_DCE_TX	0x1b0b1
 			>;
 		};
 	};

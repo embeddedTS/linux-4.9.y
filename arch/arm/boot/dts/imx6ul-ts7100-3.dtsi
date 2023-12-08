@@ -1,9 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0+ or X11
 /*
- * Copyright (C) 2019-2022 Technologic Systems, Inc. dba embeddedTS
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * Copyright (C) 2023 Technologic Systems, Inc. dba embeddedTS
  */
 
 / {
@@ -21,7 +18,6 @@
 			gpios = <&gpio7 8 GPIO_ACTIVE_LOW>;
 			default-state = "off";
 		};
-
 		/* The following are meant to be userspace controlled IO. The
 		 * kernel does not allow setting default state of GPIO, but
 		 * the default state of LEDs can be set, which is why the LED
@@ -62,13 +58,12 @@
 
 };
 
-
 /* CPU GPIO1: 209c000.gpio */
 &gpio1 {
 	gpio-line-names =
-		"AN_CH4",        "RTC_BATT_FAIL", "I2C_1_CLK",     "I2C_1_DAT",
+		"RS485_5_TXEN",  "RTC_BATT_FAIL", "I2C_1_CLK",     "I2C_1_DAT",
 		"AN_CH0",        "AN_CH1",        "",              "",
-		"AN_CH2",        "AN_CH3",        "",              "",
+		"AN_CH2",        "RS485_2_TXEN",  "",              "",
 		"",              "",              "",              "",
 		"",              "",              "",              "",
 		"",              "",              "",              "",
@@ -130,11 +125,14 @@
 };
 
 &iomuxc {
-	pinctrl-0 = <&ts7100_pinctrl_hog &ts7100z_pinctrl_hog>;
-	imx6ul-7100-z {
-		ts7100z_pinctrl_hog: 7100z_hoggrp {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ts7100_pinctrl_hog &ts7100_3_pinctrl_hog>;
+
+	imx6ul-ts7100-3 {
+		ts7100_3_pinctrl_hog: hoggrp {
 			fsl,pins = <
-				/* All GPIO should be 0x1b020 unless special
+				/*
+				 * All GPIO should be 0x1b020 unless special
 				 * 0x1b020 == Hyst., 100k PU, 50 mA drive
 				 * 0x1a020 == no pull resistor
 				 * 0x13020 == 100k PD
@@ -163,36 +161,35 @@
 
 		pinctrl_ecspi3: ecspi3grp {
 			fsl,pins = <
+				MX6UL_PAD_JTAG_TCK__GPIO1_IO14		0x1b020
+				MX6UL_PAD_JTAG_TMS__GPIO1_IO11		0x1b020
 				MX6UL_PAD_NAND_CE0_B__ECSPI3_SCLK	0x1b020
 				MX6UL_PAD_NAND_CE1_B__ECSPI3_MOSI	0x1b020
 				MX6UL_PAD_NAND_CLE__ECSPI3_MISO		0x1b020
-				/* WIFI CS# */
 				MX6UL_PAD_NAND_READY_B__GPIO4_IO12	0x1b020
-				/* WIFI IRQ */
-				MX6UL_PAD_JTAG_TMS__GPIO1_IO11		0x1b020
-				/* EN WIFI PWR */
-				MX6UL_PAD_JTAG_TCK__GPIO1_IO14		0x1b020
 			>;
 		};
 
 		pinctrl_uart2: uart2grp {
 			fsl,pins = <
-				MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x1b0b1
+				MX6UL_PAD_GPIO1_IO09__GPIO1_IO09	0x13020
 				MX6UL_PAD_UART2_RX_DATA__UART2_DCE_RX	0x1b0b1
+				MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x1b0b1
 			>;
 		};
 
 		pinctrl_uart3: uart3grp {
 			fsl,pins = <
-				MX6UL_PAD_UART3_RX_DATA__UART3_DCE_RX	0x1b0b1
-				MX6UL_PAD_UART3_TX_DATA__UART3_DCE_TX	0x1b0b1
 				MX6UL_PAD_UART3_CTS_B__UART3_DCE_CTS	0x1b0b1
 				MX6UL_PAD_UART3_RTS_B__UART3_DCE_RTS	0x1b0b1
+				MX6UL_PAD_UART3_RX_DATA__UART3_DCE_RX	0x1b0b1
+				MX6UL_PAD_UART3_TX_DATA__UART3_DCE_TX	0x1b0b1
 			>;
 		};
 
 		pinctrl_uart4: uart4grp {
 			fsl,pins = <
+				MX6UL_PAD_JTAG_TDI__GPIO1_IO13		0x1b020
 				MX6UL_PAD_UART4_RX_DATA__UART4_DCE_RX	0x1b0b1
 				MX6UL_PAD_UART4_TX_DATA__UART4_DCE_TX	0x1b0b1
 			>;
@@ -200,6 +197,7 @@
 
 		pinctrl_uart5: uart5grp {
 			fsl,pins = <
+				MX6UL_PAD_GPIO1_IO00__GPIO1_IO00	0x13020
 				MX6UL_PAD_UART5_RX_DATA__UART5_DCE_RX	0x1b0b1
 				MX6UL_PAD_UART5_TX_DATA__UART5_DCE_TX	0x1b0b1
 			>;
@@ -207,42 +205,47 @@
 	};
 };
 
-
 &uart2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>;
-	status = "okay";
+	uart-has-rtscts;
+	rts-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
+	linux,rs485-enabled-at-boot-time;
+	dma-names = "", "";
+        status = "okay";
 };
 
-&uart3 { /* BT */
+&uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
 	status = "okay";
-	fsl,uart-has-rtscts;
+	uart-has-rtscts;
 };
 
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
 	status = "okay";
+	rts-gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
 };
 
 &uart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart5>;
-	status = "okay";
+	uart-has-rtscts;
+	linux,rs485-enabled-at-boot-time;
+	dma-names = "", "";
+        status = "okay";
 };
 
 &usbotg1 {
 	dr_mode = "host";
 	disable-over-current;
-	vbus-supply = <&dummy_3v3>;
 	status = "okay";
 };
 
 &usbotg2 {
 	dr_mode = "host";
 	disable-over-current;
-	vbus-supply = <&dummy_3v3>;
 	status = "okay";
 };
