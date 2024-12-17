@@ -206,15 +206,12 @@
 	cs-gpios = <&gpio4 22 GPIO_ACTIVE_HIGH>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ecspi2>;
-	status = "disabled";
+	status = "okay";
 
 	spinor: spi@0 {
-		compatible = "micron,n25q064", "jedec,spi-nor";
+		compatible = "issi,is25lp064", "jedec,spi-nor";
 		reg = <0>;
-		spi-max-frequency = <108000000>;
-		size = <0x800000>;
-		address-width = <24>;
-		pagesize = <256>;
+		spi-max-frequency = <18000000>;
 	};
 };
 
@@ -228,7 +225,7 @@
 	wilc_spi@0 {
 		compatible = "microchip,wilc1000", "microchip,wilc3000";
 		reg = <0>;
-		spi-max-frequency = <48000000>;
+		spi-max-frequency = <18000000>;
 		reset-gpios = <&gpio3 13 GPIO_ACTIVE_HIGH>;
 		chip_en-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
 		interrupt-parent = <&gpio1>;
